@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Appunti_Rust.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+<link rel="stylesheet" href="file:///c%3A/Users/antoc/Documents/MEGAsync/PROGRAMMAZIONE%20DI%20SISTEMA/RUST/dark.css" type="text/css">
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="rust----omit-in-toc">RUST <!-- omit in toc --></h1>
+<h2 id="indice----omit-in-toc">Indice <!-- omit in toc --></h2>
+<ul>
+<li><a href="#smart-pointers">Smart Pointers</a>
+<ul>
+<li><a href="#operazioni-sui-puntatori">Operazioni sui puntatori</a></li>
+<li><a href="#smart-pointer-in-rust">Smart pointer in Rust</a></li>
+<li><a href="#boxt">Box&lt;T&gt;</a></li>
+<li><a href="#rct">Rc&lt;T&gt;</a></li>
+<li><a href="#weakt">Weak&lt;T&gt;</a></li>
+<li><a href="#cellt">Cell&lt;T&gt;</a></li>
+<li><a href="#refcellt">RefCell&lt;T&gt;</a></li>
+</ul>
+</li>
+<li><a href="#concorrenza-intra-processo">Concorrenza intra-processo</a>
+<ul>
+<li><a href="#perch%C3%A9-usare-pi%C3%B9-thread">Perché usare più thread</a></li>
+<li><a href="#tipi-di-thread">Tipi di thread</a></li>
+<li><a href="#thread-nativi">Thread Nativi</a></li>
+<li><a href="#vantaggi-e-svantaggi-della-concorrenza">Vantaggi e svantaggi della concorrenza</a></li>
+<li><a href="#os-e-cpu">OS e CPU</a></li>
+<li><a href="#modello-di-memoria">Modello di memoria</a></li>
+<li><a href="#problemi-aperti">Problemi aperti</a></li>
+<li><a href="#soluzioni-hw-ai-problemi-precedenti">Soluzioni HW ai problemi precedenti</a></li>
+<li><a href="#thread-e-memoria">Thread e memoria</a></li>
+<li><a href="#esecuzione-di-un-thread">Esecuzione di un thread</a></li>
+<li><a href="#interferenza">Interferenza</a></li>
+<li><a href="#sincronizzazione">Sincronizzazione</a></li>
+<li><a href="#strutture-native-di-sincronizzazione">Strutture native di sincronizzazione</a></li>
+<li><a href="#correttezza-dei-programmi-concorrenti">Correttezza dei programmi concorrenti</a></li>
+<li><a href="#thread-in-rust">Thread in Rust</a></li>
+<li><a href="#i-tratti-della-concorrenza">I tratti della concorrenza</a></li>
+<li><a href="#modelli-di-concorrenza">Modelli di concorrenza</a></li>
+<li><a href="#condivisione-dello-stato">Condivisione dello stato</a></li>
+<li><a href="#condivisione-dello-stato-in-rust">Condivisione dello stato in Rust</a></li>
+<li><a href="#lifetime-dei-riferimenti-nei-thread">Lifetime dei riferimenti nei thread</a></li>
+<li><a href="#thread-con-stdthreadscope">Thread con std::thread::scope</a></li>
+<li><a href="#alternativa-a-mutext-rwlockt">Alternativa a Mutex&lt;T&gt;: RwLock&lt;T&gt;</a></li>
+<li><a href="#attese-condizionate">Attese condizionate</a></li>
+<li><a href="#metodi-principali-di-condvar">Metodi principali di Condvar</a></li>
+<li><a href="#notifiche-spurie">Notifiche spurie</a></li>
+<li><a href="#notifiche-perse">Notifiche perse</a></li>
+<li><a href="#attesa-temporizzata">Attesa temporizzata</a></li>
+<li><a href="#condivisione-di-messaggi">Condivisione di messaggi</a></li>
+<li><a href="#canali-sincroni">Canali sincroni</a></li>
+<li><a href="#libreria-crossbeam">Libreria Crossbeam</a></li>
+<li><a href="#uso-della-libreria-crossbeam">Uso della libreria Crossbeam</a></li>
+<li><a href="#il-modello-degli-attori">Il modello degli attori</a></li>
+</ul>
+</li>
+<li><a href="#concorrenza-inter-processo">Concorrenza inter-processo</a>
+<ul>
+<li><a href="#creazione-di-processi">Creazione di processi</a></li>
+<li><a href="#terminazione-di-processi">Terminazione di processi</a></li>
+<li><a href="#processi-in-rust">Processi in Rust</a></li>
+<li><a href="#interazione-tra-fork-e-stdio">Interazione tra fork() e stdio</a></li>
+<li><a href="#terminazione-di-un-processo-in-rust">Terminazione di un processo in Rust</a></li>
+<li><a href="#gestione-di-altri-processi">Gestione di altri processi</a></li>
+<li><a href="#inter-process-communication-ipc">Inter-Process Communication (IPC)</a></li>
+<li><a href="#rappresentazione-esterna-dei-dati">Rappresentazione esterna dei dati</a></li>
+<li><a href="#serializzazione">Serializzazione</a></li>
+<li><a href="#esempi-di-primitive-ipc">Esempi di primitive IPC</a>
+<ul>
+<li><a href="#coda-di-messaggi">Coda di messaggi</a></li>
+<li><a href="#pipe">Pipe</a></li>
+</ul>
+</li>
+<li><a href="#serializzazione-e-deserializzazione-con-libreria-serde">Serializzazione e Deserializzazione con libreria 'serde'</a></li>
+<li><a href="#comunicazione-tra-processi-con-le-librerie-interprocess-e-zbus">Comunicazione tra processi con le librerie 'interprocess' e 'zbus'</a></li>
+</ul>
+</li>
+<li><a href="#programmazione-asincrona">Programmazione asincrona</a>
+<ul>
+<li><a href="#implementazione-dellesecuzione-asincrona">Implementazione dell'esecuzione asincrona</a></li>
+<li><a href="#esecuzione-parziale">Esecuzione parziale</a></li>
+<li><a href="#il-tratto-future">Il tratto Future</a></li>
+<li><a href="#librerie-asincrone-esterne">Librerie asincrone esterne</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="smart-pointers">Smart Pointers</h2>
+<h3 id="operazioni-sui-puntatori">Operazioni sui puntatori</h3>
+<p>I puntatori sono oggetti molto vantaggiosi da utilizzare, ad esempio nella realizzazione di strutture dati dinamiche, ma si portano dietro tutta una serie di problemi. Per questo, già C++ introduce, a fianco dei puntatori nativi, ossia quelli del C, dei tipi particolari che si comportano e si utilizzano come dei normali puntatori, ma che in realtà, rispetto ai puntatori puri, <strong>non consistono semplicemente di 8 byte, ma sono strutture dati più complesse, che offrono determinate garanzie</strong>.</p>
+<p>In Rust, esistono oltre ai puntatori nativi (quelli unsafe) i tipi reference, ossia <code>&amp;</code> ed <code>&amp;mut</code> (operatori che permettono di <strong>ottenere dei riferimenti</strong> eventualmente mutabili per un certo dato), su cui vigila il borrow checker, che ne assicura l'utilizzo corretto da parte del programmatore.</p>
+<p>L'operazione opposta, quella che da un riferimento consente di accedere al dato puntato, è detta <strong>dereferencing o dereferenza</strong> o risoluzione del riferimento ed è effettuata tramite l'operatore <code>*</code>, in Rust. Il dereferencing può essere applicato sia ai tipi reference che ai puntatori nativi, con una differenza: nel caso dei reference è sempre garantito che questa operazione sia valida, perché il borrow checker impedisce all'atto della compilazione di avere dei <strong>dangling pointers</strong>, ossia puntatori a porzioni di memoria contenenti dati non più validi. <strong>Si possono ancora avere dangling pointers nel caso dei puntatori nativi</strong>, su cui il borrow checker non esegue controlli.</p>
+<p>Sia C++, sia Rust, danno la possibilità di <strong>estendere le operazioni elementari</strong> a tipi più complessi (esempio somma, confronto di uguaglianza, ...), ridefinendo gli operatori in C++ o implementando opportuni tratti in Rust. Esiste anche la possibilità di <strong>ridefinire l'operazione di dereferencing</strong>. Questo permette di <strong>trattare determinate strutture dati come se fossero dei reference</strong>. Queste strutture dati prendono il nome di <strong>smart pointers</strong>.</p>
+<p>Queste strutture dati, rispetto ai puntatori nativi e ai reference, possono avere caratteristiche aggiuntive, ad esempio</p>
+<ul>
+<li>garanzia implicita di inizializzazione e rilascio dei dati puntati</li>
+<li>possesso del dato puntato</li>
+<li>possibilità di avere più di un proprietario per una certa struttura dati, che quindi rimane 'viva' finché qualcuno ne possiede lo smart pointer (conteggio dei riferimenti: esempio <code>Rc&lt;T&gt;</code>)</li>
+</ul>
+<h3 id="smart-pointer-in-rust">Smart pointer in Rust</h3>
+<p>Rust offre una varietà di smart pointer più ampia rispetto al C++, per coprire le esigenze di programmi puramente sequenziali e di programmi concorrenti. Quelli più simili a quelli del C++ sono <code>Box&lt;T&gt;</code>,<code>Rc&lt;T&gt;</code>, <code>Arc&lt;T&gt;</code> e <code>Weak&lt;T&gt;</code>. Altri, più peculiari di Rust sono <code>Cell&lt;T&gt;</code>, <code>RefCell&lt;T&gt;</code>, <code>Cow&lt;T&gt;</code>, <code>Mutex&lt;T&gt;</code>, <code>RwLock&lt;T&gt;</code>.</p>
+<p>Gli smart pointer in Rust sono implementati come struct che implementano i tratti <code>Deref</code> e <code>DerefMut</code>: quando si usa l'operatore <code>*</code> di dereferencing, ad esempio <code>*ptr</code>, l'espressione viene riscritta dal compilatore come <code>*ptr.deref()</code> o <code>*ptr.deref_mut()</code> a seconda dei casi (i metodi <code>deref()</code> e <code>deref_mut()</code> ritornano rispettivamente dei reference o reference mutabili).</p>
+<h3 id="boxt">Box&lt;T&gt;</h3>
+<p>Box è un tipo di smart pointer che possiede il dato cui punta, che viene allocato nell'heap. Box contiene al suo interno (non pubblicamente accessibile) un puntatore al dato memorizzato nell'heap. Essendo uno smart pointer, si può utilizzare esattamente come un reference.</p>
+<p>Essendo proprietario del <strong>dato contenuto al suo interno</strong>, Box è automaticamente responsabile della sua <strong>distruzione</strong>, che <strong>avviene quando il Box esce dallo scope</strong>.</p>
+<p>Nota: Box non è un tipo Copy, quindi, automaticamente, se viene passato a un altra variabile o a una funzione, la proprietà del dato viene trasferita, insieme alla responsabilità di effettuare il rilascio della memoria.</p>
+<p>Uno dei vantaggi di Box è che può 'contenere' sia dati con dimensione nota a priori, ossia quelli che implementano il tratto <code>Size</code>, sia quelli che hanno una dimensione variabile. Nel primo caso, Box usa un <strong>puntatore semplice</strong>, mentre nel secondo caso usa un <strong>fat pointer</strong>, che include la dimensione del dato puntato.</p>
+<p>Se al posto di passare un tipo concreto T alla Box si passa un <strong>oggetto-tratto</strong> , ossia del tipo <code>dyn Trait</code>, si ha un fat pointer che contiene due puntatori: uno verso il dato sull'heap e uno alla vtable del tratto.</p>
+<h3 id="rct">Rc&lt;T&gt;</h3>
+<p>Permette di avere più proprietari per il dato contenuto al suo interno. Fintanto che è in vita almeno un possessore <code>Rc&lt;T&gt;</code>, anche il dato contenuto resta vivo. Quando non c'è più alcun possessore, il dato viene rilasciato.</p>
+<p>A differenza di <code>Box&lt;T&gt;</code>, <strong>il dato contenuto in <code>Rc&lt;T&gt;</code> non è mutabile, ma è accessibile in sola lettura</strong> (si può chiamare la funzione <code>Rc::get_mut(&amp;mut rc)</code> per provare a ottenere un <code>&amp;mut</code> al dato contenuto, ma dietro un <code>Option</code>, in quanto il metodo restituisce un puntatore solo se esiste un'unica istanza di <code>Rc</code>).</p>
+<p>Internamente, un <code>Rc&lt;T&gt;</code> mantiene un puntatore a un blocco sull'heap, contenente:</p>
+<ul>
+<li>il dato di tipo <code>T</code></li>
+<li>un contatore <code>strong</code>, che indica <strong>quante copie dell'<code>Rc&lt;T&gt;</code></strong> esistono in un dato istante</li>
+<li>un contatore <code>weak</code>, che indica <strong>quanti riferimenti weak</strong> sono presenti in un certo istante</li>
+</ul>
+<p>Un oggetto di tipo <code>Rc&lt;T&gt;</code> si può duplicare usando il metodo <code>clone()</code> su una sua istanza. Quando questo succede, il contatore <code>strong</code> viene incrementato.</p>
+<p>Quando un'istanza di <code>Rc&lt;T&gt;</code> esce dallo scope, <code>strong</code> viene decrementato: se dopo questa operazione è 0, questo vuol dire che non esiste più alcun proprietario per il valore contenuto, che quindi viene rilasciato. Se il contatore non è 0 il dato continua invece a esistere e la memoria non viene rilasciata.</p>
+<p>Questo smart pointer si presta bene per realizzare alberi e grafi <strong>aciclici</strong>.</p>
+<p>Il vincolo della mancanza di cicli è dovuto al fatto che la loro presenza comporta il verificarsi di un <strong>memory leak</strong>: se A punta a B e viceversa, il drop di un <code>Rc&lt;T&gt;</code> che punta ad A fa solo decrementare il contatore <code>Strong</code> di A da 2 a 1. Se l'unico <code>Rc&lt;T&gt;</code> che punta a B si trova dentro A, allora è B è irraggiungibile dallo stack. Se anche si avesse un <code>Rc&lt;T&gt;</code> che punta a B nello stack, il suo drop comporterebbe solo la diminuzione del contatore <code>strong</code> di B da 2 a 1, rendendo anche B irraggiungibile. D'altro canto, né A né B sono stati deallocati, perché il loro reference count rimane a 1 e non c'è alcun modo di farlo diminuire.</p>
+<p>Se si vuole realizzare una struttura ciclica occorre usare anche smart pointers di tipo <a href="#weakt"><code>std::rc::Weak&lt;T&gt;</code></a></p>
+<p><strong>L'utilizzo di <code>Rc&lt;T&gt;</code> non è possibile in un contesto multi-thread</strong>, per via del meccanismo che richiede di incrementare e decrementare il reference count. Infatti l'operazione di incremento/decremento, di tipo <strong>Read-Modify-Write, non è atomica</strong>, per cui non funziona bene in presenza di più thread (Vedi sezione sulla Concorrenza). Per risolvere questo problema, è sufficiente utilizzare al posto di <code>Rc&lt;T&gt;</code> il tipo <code>Arc&lt;T&gt;</code>, che funziona allo stesso modo, ma offre l'operazione di read-modify-write in maniera atomica. L'utilizzo di operazioni atomiche è necessario quando si lavora in contesti multi-thread, ma non è affatto necessario quando il thread è uno solo, e in tal caso deve essere evitato, perché comporta un costo in prestazioni.</p>
+<p>È possibile usare le funzioni <code>strong_count()</code> e <code>weak_count()</code> per conoscere il valore dei campi <code>strong</code> e <code>weak</code>.</p>
+<blockquote>
+<p>Nota: in Rc&lt;T&gt;, per usare i metodi, allo scopo di evitare problemi di omonimia, non è possibile usare la notazione puntata, ma occorre scrivere la funzione per esteso. Ad esempio, per chiamare strong_count() si userà: <code>Rc::&lt;T&gt;::strong_count(&amp;a)</code>, essendo <code>a</code> una istanza di <code>Rc&lt;T&gt;</code>.</p>
+</blockquote>
+<h3 id="weakt">Weak&lt;T&gt;</h3>
+<p>Sono puntatori che non contribuiscono a mantenere in vita la struttura dati puntata. Si ottengono a partire da un puntatore di tipo <code>Rc&lt;T&gt;</code> chiamando il metodo <code>downgrade()</code> e sono utilizzabili solo se la struttura dati cui puntano è ancora in vita. Per questo motivo, non sono direttamente dereferenziabili tramite <code>*</code>: devono prima, se possibile, essere tramutati in un <code>Rc&lt;T&gt;</code> tramite il metodo <code>upgrade()</code>, che ritorna un <code>Option&lt;Rc&lt;T&gt;&gt;</code>.</p>
+<p>Occorre notare che una struttura dati puntata solo da tipi <code>Weak&lt;T&gt;</code> non viene immediatamente rilasciata (almeno finché uno dei due contatori, strong o weak, non è a 0), ma se <code>strong</code> è 0, la struttura dati è comunque irraggiungibile, quindi 'morta' di fatto.</p>
+<p>Un esempio pratico di utilizzo di <code>Weak&lt;T&gt;</code> è quello di un albero in cui i nodi figli puntano al nodo padre tramite questo tipo di puntatore (il padre punta a sua volta ai figli, quindi si forma un ciclo).</p>
+<h3 id="cellt">Cell&lt;T&gt;</h3>
+<p><code>Cell&lt;T&gt;</code> permette <strong>l'accesso condiviso in lettura e scrittura a un dato allocato sullo stack</strong> e contenuto al suo interno, anche quando il contenitore, ossia la struct <code>Cell&lt;T&gt;</code> non è mutabile. Si vogliono così aggirare i vincoli del borrow checker, che impedisce la mutabilità condivisa (ossia la presenza di più reference mutabili <em>attivi</em> simultaneamente), che in alcuni casi particolari sono troppo stringenti.</p>
+<p>L'idea implementata dal tipo <code>Cell&lt;T&gt;</code> è applicabile solo in un contesto single-thread e prende il nome di <strong>interior mutability</strong>. Permette di modificare il dato contenuto dentro la <code>Cell&lt;T&gt;</code> anche se si ha un <code>&amp;</code> semplice alla <code>Cell&lt;T&gt;</code> stessa.</p>
+<p><code>Cell&lt;T&gt;</code> fornisce il metodo <code>set()</code> per accedere in scrittura al dato contenuto al suo interno. Altri metodi sono <code>get()</code>, che restituisce il dato all'interno, purché implementi <code>Copy</code>, <code>replace()</code>, che sostituisce il dato interno con uno nuovo, ritornando quello vecchio e <code>into_inner()</code>, che consuma la <code>Cell&lt;T&gt;</code> e restituisce il dato.</p>
+<blockquote>
+<p>Nota: <code>Cell&lt;T&gt;</code> non permette di ottenere riferimenti al dato interno, che è accessibile solo tramite di metodi precedenti per leggere, scrivere, rimpiazzare. Per ottenerne un 'reference', occorre usare <code>RefCell&lt;T&gt;</code>.</p>
+</blockquote>
+<h3 id="refcellt">RefCell&lt;T&gt;</h3>
+<p><code>RefCell&lt;T&gt;</code> contiene un dato del quale permette di ottenere uno smart pointer che si comporta come un reference o un reference mutabile, ma la cui <strong>compatibilità con le regole del borrow checker è stabilita solo a runtime e non all'atto della compilazione</strong>. Internamente, la <code>RefCell&lt;T&gt;</code> mantiene un campo <code>borrow</code> per tenere traccia dei borrow effettuati.</p>
+<p>Per ottenere i reference, si usano i metodi <code>borrow()</code> e <code>borrow_mut()</code>, che restituiscono, rispettivamente, uno smart pointer <code>Ref</code> o un <code>RefMut</code>. Anche in questo caso si ha <strong>interior mutability</strong>, quindi non è necessario che la <code>RefCell&lt;T&gt;</code> sia mutabile e funziona solo in ambito single-thread.</p>
+<h2 id="concorrenza-intra-processo">Concorrenza intra-processo</h2>
+<p>Consideriamo l'esecuzione parallela di più thread o l'esecuzione asincrona all'interno di un singolo thread o di più thread. Rust dà un aiuto per garantire la scrittura di programmi concorrenti che evitano un vasta gamma di errori.</p>
+<p>Un programma concorrente prevede due o più flussi di esecuzione contemporanei, differentemente da quanto avviene nei programmi strettamente sequenziali. <strong>Ogni flusso di esecuzione prende il nome di thread</strong>. Il programma parte con un thread principale e successivamente può richiedere <strong>l'attivazione di altri thread</strong>. Ciò <strong>richiede l'intervento del sistema operativo</strong>, che è pensato per avere una pluralità di thread: già l'esecuzione di ogni programma prevede che il sistema operativo avvii thread separati, ovvero flussi di esecuzione indipendenti.</p>
+<p>La <strong>differenza tra la creazione di processi indipendenti e di thread</strong> è che i processi sono isolati, ovvero ognuno ha il proprio spazio di indirizzamento: ciò che succede nel processo 1 non ha alcun impatto su ciò che succede nel processo 2 (non esattamente, perché esistono comunque dei punti di contatto, ad esempio, accesso contemporaneo a un file, apertura contemporanea di un socket, ... Quindi l'isolamento non è comunque perfetto).</p>
+<p>Benché l'isolamento tra processi in alcuni casi sia vantaggioso, in altri è un ostacolo, perché non permette la cooperazione tra i processi.</p>
+<p><strong>I thread creati nel contesto dello stesso processo, invece, condividono lo stesso spazio di indirizzamento virtuale</strong>. Di conseguenza i thread possono accedere alle variabili di altri thread, se conoscono il loro indirizzo. Ciò può essere vantaggioso, ma richiede particolare attenzione, perché può essere fonte di problemi.</p>
+<h3 id="perch%C3%A9-usare-pi%C3%B9-thread">Perché usare più thread</h3>
+<p>Se il lavoro da svolgere è suddivisibile in più parti quasi indipendenti e il processore utilizzato è dotato di più core, le performance possono migliorare svolgendo più attività in parallelo.</p>
+<p>Dividere un programma in attività abbastanza indipendenti non è sempre semplice.</p>
+<p>Lo schedulatore del sistema operativo assegna i core della CPU a un certo insieme di thread per un certo <strong>'quanto' di tempo</strong>, al termine del quale i thread sono congelati e riposti in una parte della memoria kernel e sostituiti da altri scelti dal sistema operativo, tra quelli in coda che si trovano nello stato <em>runnable</em>.</p>
+<p>Le attività svolte dai thread, essendo indipendenti, possono finire, indipendentemente le une dalle altre, con stato di successo o errore. Per gestire questa situazione, il SO mantiene per ogni thread un identificatore univoco per ogni thread, <strong>TID</strong>, una <strong>porzione di memoria kernel</strong> in cui può essere 'riposto' una volta non più in esecuzione sulla CPU (per salvare il suo stato), lo <strong>stato del thread</strong>, esempio 'runnable', 'not runnable' (esempio se sta aspettando delle operazioni di I/O. Si tiene traccia anche del motivo per cui un thread è not runnable).</p>
+<p>Data la natura del processo di scheduling, l'esatto alternarsi dell'esecuzione dei thread nella CPU non è predicibile.</p>
+<h3 id="tipi-di-thread">Tipi di thread</h3>
+<p>Questi thread, gestiti direttamente dal sistema operativo, sono detti <strong>thread nativi</strong>. Sono disponibili in qualsiasi sistema operativo. Il problema di questa classe di thread è che l'API per la loro gestione è completamente diversa tra un SO e un altro.</p>
+<p>Si può ottenere un comportamento simil-thread anche senza scomodare il SO, nel senso che l'alternarsi tra i flussi di esecuzione è gestito non dal SO ma dai flussi stessi (cedono volontariamente l'uso della CPU). Questo genere di thread, detti <strong>Green Thread</strong>, è adatto a essere utilizzato anche se il SO non ha supporto esplicito per i thread.</p>
+<p>C, C++ e Rust offrono supporto per i thread nativi e tramite librerie di terze parti anche per i green thread.</p>
+<h3 id="thread-nativi">Thread Nativi</h3>
+<p>Tutti i SO che li supportano offrono funzioni per:</p>
+<ul>
+<li><strong>Creazione di un thread</strong>: quando viene creato un thread, occorre allocare uno stack (ad uso esclusivo di quel thread) all'interno di un certo spazio di indirizzamento. Uno stack deve sempre essere costituito da una porzione contigua dello spazio di indirizzamento (logico). Una volta creato il thread, il SO restituisce un identificatore, detto <em>'handle'</em> (esempio un puntatore), che permette di interagire con il thread. I linguaggi come Rust nascondono questa handle all'interno di opportuni oggetti (cioè il programmatore non li manipola in maniera diretta).</li>
+<li><strong>Identificazione del thread corrente</strong>: ogni thread è identificato per mezzo di un identificativo univoco nel sistema, detto <em>TID</em>.</li>
+<li><strong>Attesa della terminazione di un thread</strong>: a volte è necessario che un thread si fermi in uno specifico punto della sua esecuzione fino alla terminazione di un altro thread. Questa operazione è detta <em>join</em> ed è potenzialmente bloccante.</li>
+</ul>
+<p>I SO <strong>non</strong> forniscono invece alcuna funzione per gestire la <strong>cancellazione di un thread</strong>, operazione problematica: l'arresto di un singolo thread può essere gestito solo dallo stesso thread all'interno del proprio codice.</p>
+<p>È invece possibile fermare tutti i thread di un processo, ad esempio usando i segnali (es. 'kill -9') o il task manager in Windows (comunque in maniera poco pulita).</p>
+<h3 id="vantaggi-e-svantaggi-della-concorrenza">Vantaggi e svantaggi della concorrenza</h3>
+<p>La concorrenza, consente di sovrapporre operazioni differenti nello stesso intervallo di tempo, il che è utile, ad esempio, quando occorre effettuare <strong>diverse computazioni indipendenti</strong> (es: calcolo della matrice inversa), oppure <strong>alternare calcolo e I/O</strong>. Nei due precedenti casi è comune l'<strong>utilizzo di thread</strong>, mentre quando l'attività prevalente è l'I/O si preferisce la <strong>programmazione asincrona</strong>, perché i thread rimarrebbero nello stato not runnable per la maggior parte del tempo.</p>
+<p>In ogni caso, l'uso di thread o programmazione asincrona comporta l'introduzione di una complessità aggiuntiva non indifferente, che deve essere giustificata da evidenti vantaggi in termini di prestazioni.</p>
+<p>La scrittura di programmi concorrenti richiede spesso la <strong>comunicazione tra i processi o thread coinvolti</strong>.</p>
+<p>Processi distinti non condividono lo stesso spazio di indirizzamento, quindi permettere loro di comunicare è abbastanza complesso. Una possibile forma di comunicazione prevede l'uso di un file condiviso, ma ciò in genere è talmente oneroso da ridurre drasticamente i vantaggi dell'avere processi indipendenti (accesso al disco, serializzazione dei dati, ...).</p>
+<p>La comunicazione tra thread è più semplice ed efficiente, grazie alla condivisione dello spazio di indirizzamento.</p>
+<p>Il <strong>vantaggio principale della concorrenza</strong> è quello di poter sfruttare le <strong>CPU multi-core</strong> e eseguire delle operazioni con <strong>reale parallelismo,riducendo i tempi di elaborazione</strong>.</p>
+<p>Lo <strong>svantaggio principale</strong> è l'enorme <strong>aumento della complessità del programma</strong>: si introducono fonti di errore inesistenti in programmi puramente sequenziali. <strong>L'interlacciamento dei flussi di esecuzione non è deterministico</strong>, sebbene i singoli flussi mantengano l'ordine di esecuzione delle istruzioni. La memoria non è più un deposito statico, nel senso che se una variabile è condivisa da più thread, e il primo la legge, non è detto che ci trovi scritto all'interno l'ultima cosa che lui stesso aveva scritto: occorre quindi <strong>coordinare l'accesso alla memoria</strong>. Anche la presenza delle cache è problematica per programmi concorrenti.</p>
+<p>La necessità di far comunicare i thread e sincronizzarli interferisce con le ottimizzazioni introdotte sia dai compilatori che dai processori stessi.</p>
+<h3 id="os-e-cpu">OS e CPU</h3>
+<p>La CPU esegue normalmente le istruzioni di un programma passando attraverso una serie di fasi, esempio fetch/decode/execute. Il SO interviene periodicamente con degli interrupt che attivano lo scheduler. Lo scheduler salva lo stato dei registri della CPU in una apposita area di memoria e ripristina il contenuto di un thread differente (<strong>task switching</strong>). Ovviamente per la CPU non cambia nulla; al massimo, se il thread nuovo non appartiene allo stesso processo di quello vecchio, occorre riconfigurare la MMU e le tabelle di paginazione. Si noti che anche se la CPU ha ricevuto l'interrupt del SO non esegue il task switching finché l'istruzione assembler corrente (non di alto livello) non è completata. Questo, tuttavia, implica che operazioni più complesse del tipo &quot;oggetto.metodo()&quot; potrebbero essere interrotte a metà. Se il thread che subentra va a leggere i dati manipolati dal thread precedente, potrebbe trovare risultati inconsistenti.</p>
+<p>Questo meccanismo avviene sia per CPU single-core sia per CPU multicore, in cui tale problematica è amplificata.</p>
+<h3 id="modello-di-memoria">Modello di memoria</h3>
+<p>Per avere una certa utilità, i thread devono necessariamente avere dei punti di contatto tra loro, attraverso aree di memoria condivisa, il che comporta dei problemi:</p>
+<p>quando un thread legge da una locazione di memoria, esso può trovare:</p>
+<ol>
+<li>Il valore di inizializzazione di quella locazione all'avvio del processo (ad esempio una variabile globale inizializzata o una <em>&amp;'static str</em>).</li>
+<li>Il valore che il thread stesso ha scritto in quella locazione.</li>
+<li>Il valore che un altro thread ha scritto in quella locazione, se la variabile è condivisa.</li>
+</ol>
+<p>Il caso 3 è più problematico di quel che sembra a causa della presenza delle cache, perché possono presentarsi inconsistenze.</p>
+<p><img src="assets/cache.png" alt="architettura con cache"></p>
+<p>Nella figura sono mostrati i diversi livelli di cache, progressivamente, da L1 a L3, più grandi e più lente. La cache L1 è separata in una cache di istruzioni e una di dati. Ogni core ha le proprie cache L1 e L2 (talvolta anche la cache L2 può essere condivisa tra più core), mentre la cache L3 è condivisa tra i core.</p>
+<p>Esempio di problema: il core 1 e il core 2 leggono un certo dato, che non è in nessuna cache: 0. Il core 1 vuole scrivere 7 e il core 2 vuole scrivere 14. Entrambi scriveranno nella propria cache L1, che si occupa poi di propagare il risultato anche alla cache L2, ... ma se nel frattempo un terzo core leggesse lo stesso dato, troverebbe ancora 0 nella RAM.</p>
+<p>Per evitare ciò occorre fare le seguenti operazioni:</p>
+<ul>
+<li>Quando un core legge una variabile condivisa, deve prima invalidare la propria cache, perché il dato letto potrebbe essere variato nel frattempo e quindi va prelevato alla sorgente.</li>
+<li>Quando un core scrive nella cache L1, il risultato va subito propagato alle altre cache e alla RAM.</li>
+</ul>
+<p>Il problema è che una variabile nel codice non sa di essere condivisa, per cui deve essere il programmatore a evidenziare questo aspetto.</p>
+<h3 id="problemi-aperti">Problemi aperti</h3>
+<ul>
+<li><strong>Atomicità</strong>: Operazioni non atomiche possono essere problematiche se effettuate su variabili condivise, perché potrebbero essere interrotte e lasciare i dati in stati inconsistenti.</li>
+<li><strong>Visibilità</strong>: Quando un thread termina una operazione su dati condivisi, si vuole che il risultato sia visibile a tutti gli altri. Il problema si pone per via dell'esistenza delle cache: un thread in esecuzione su un core effettua scritture nella cache L1 di quel core, ma non è possibile prevedere <em>quando</em> questa modifica si propaga alle altre cache e alla RAM.</li>
+<li><strong>Ordinamento</strong>: Quando un thread svolge una serie di operazioni, si vuole che i loro risultati si propaghino e siano quindi visibili all'esterno nello stesso ordine con cui sono stati generati dal thread stesso. Supponiamo, per esempio, di voler effettuare in sequenza le operazioni <em>i = i - 1; j = j + 1</em>. La presenza delle cache fa sì che le modifiche possano propagarsi al contrario, ovvero, non ci sono garanzie sull'ordine con cui le modifiche si propagano alle altre cache e alla RAM.</li>
+</ul>
+<h3 id="soluzioni-hw-ai-problemi-precedenti">Soluzioni HW ai problemi precedenti</h3>
+<p>Ogni processore ha un suo meccanismo per risolvere questi problemi.</p>
+<ul>
+<li>I processori x86 offrono le istruzioni di tipo <strong>fence</strong>, che garantiscono il flush delle cache sulla RAM e bloccano eventuali accessi da parte di altri core a quel segmento di indirizzi fino al completamento dell'operazione di scrittura. Contestualmente, permettono di invalidare la cache degli altri, per garantire che venga sempre letto il dato corretto. Il meccanismo è semplice, ma poco efficiente.</li>
+<li>I processori ARM usano una tecnica più sofisticata, detta change propagation list, con istruzioni dette <strong>barrier</strong>.</li>
+</ul>
+<p>Queste particolari istruzioni non possono essere utilizzate direttamente nei linguaggi ad alto livello (a meno di non utilizzare dell'inline assembly), ma sono già internamente utilizzate da funzioni apposite di libreria.</p>
+<h3 id="thread-e-memoria">Thread e memoria</h3>
+<p>Il sistema operativo mantiene tutte le informazioni necessarie per rappresentare i thread:</p>
+<ul>
+<li>TID: un identificatore univoco</li>
+<li>Informazioni necessarie per salvare e ripristinare lo stato di un thread</li>
+<li>Un blocco di indirizzi logici contigui che costituisce lo stack del thread</li>
+<li>Lo stato di esecuzione</li>
+</ul>
+<p>I <strong>dati condivisi dai thread di uno stesso processo</strong> sono invece:</p>
+<ul>
+<li>Le variabili globali (se previste)</li>
+<li>Le costanti</li>
+<li>L'area di memoria contenente il codice (sola lettura)</li>
+<li>L'intero <strong>heap</strong></li>
+</ul>
+<h3 id="esecuzione-di-un-thread">Esecuzione di un thread</h3>
+<p>Mentre le operazioni all'interno del singolo thread vengono eseguite sequenzialmente, non è possibile fare assunzioni riguardo il grado di avanzamento relativo tra thread differenti, a meno che non si adottino <strong>tecniche esplicite di sincronizzazione</strong>.</p>
+<p>La sincronizzazione può essere utilizzata per:</p>
+<ul>
+<li>abilitare altri thread a partire</li>
+<li>impedire ad altri thread operazioni sulle stesse aree che un certo thread sta manipolando.</li>
+</ul>
+<h3 id="interferenza">Interferenza</h3>
+<p>Un esempio di problema cui si può andare incontro è quello dell'<strong>interferenza</strong>, un fenomeno che si verifica quando <strong>più thread fanno accesso a uno stesso dato condiviso e almeno uno di essi lo modifica</strong>. L'accesso a dati condivisi in maniera incontrollata, può portare a malfunzionamenti casuali, non prevedibili.</p>
+<p>Ad esempio, si possono verificare problemi quando operazioni complesse, indivisibili dal punto di vista logico, vengono interrotte in momenti casuali dal task switching, lasciando i dati su cui operano in stati inconsistenti. Un esempio, in C++, è rappresentato da una operazione del tipo <code>a++</code>, dove <code>a</code> è una variabile condivisa. L'operazione di incremento <code>++</code>, infatti, non è atomica, ma si compone di tre parti: lettura di <code>a</code>, incremento di <code>a</code> e riscrittura di <code>a</code>.</p>
+<p>Più in generale, l'interferenza determina il verificarsi di <strong>corse critiche</strong>, malfunzionamenti che si verificano a causa di condizioni fuori dal controllo del programmatore (presenza di cache, istante in cui avviene il task switch, esecuzione speculativa del processore, ...) e che determinano un comportamento imprevedibile del dato condiviso, che può assumere:</p>
+<ul>
+<li>il valore scritto da uno dei thread</li>
+<li>un valore arbitrario</li>
+</ul>
+<h3 id="sincronizzazione">Sincronizzazione</h3>
+<p>Il problema dell'interferenza può essere aggirato facendo sì che i dati condivisi siano acceduti in mutua esclusione.</p>
+<p>Per garantire il rispetto di questo vincolo, l'approccio più semplice prevede di effettuare polling su variabili di segnalazione, ma è da evitare, perché altamente inefficiente (comporta spreco di CPU e consumo eccessivo di energia).</p>
+<p>Le soluzioni realmente utilizzate sono invece basate sull'utilizzo di:</p>
+<ul>
+<li>Istruzioni <strong>fence/barrier</strong>: garantiscono la correttezza del dato letto/scritto anche in presenza di cache;</li>
+<li><strong>Tipi Atomic</strong>: insieme di tipi molto semplici, come booleani e interi (Rust e C++, es. <code>atomic int</code>), su cui si opera in maniera atomica, con la garanzia che il dato sia letto direttamente dalla RAM e scritto nella RAM. Non sfruttando i vantaggi offerti dalla cache, questi tipi comportano prestazioni peggiori per i programmi che li utilizzano.</li>
+<li><strong>Mutex</strong>: permettono l'accesso a un dato in maniera esclusiva, grazie a un meccanismo di Lock/Unlock. <em>Lock</em> permette di ottenere il possesso di un dato, se in quel momento non è posseduto da nessun altro; se invece un altro thread ha già il possesso del dato, l'operazione di Lock si blocca, in attesa della 'liberazione' del dato (<em>Unlock</em>). Internamente i Mutex usano istruzioni fence/barrier;</li>
+<li><strong>Condition variable</strong>: permettono l'attesa del verificarsi di una certa condizione, in maniera efficiente. Si usano sempre in combinazione con un Mutex.</li>
+</ul>
+<h3 id="strutture-native-di-sincronizzazione">Strutture native di sincronizzazione</h3>
+<p>Il SO stesso offre alcune strutture di sincronizzazione, sia a <strong>livello utente</strong>, sia a <strong>livello kernel</strong>.</p>
+<p>Gli <strong>oggetti kernel</strong> possono essere usati <strong>anche tra processi differenti</strong>, mentre quelli <strong>utente</strong> possono gestire la concorrenza <strong>solo tra thread dello stesso processo</strong>.</p>
+<h3 id="correttezza-dei-programmi-concorrenti">Correttezza dei programmi concorrenti</h3>
+<p>L'uso corretto delle strutture di sincronizzazione (es. Mutex) per proteggere i dati condivisi evita i problemi esposti precedentemente. In quasi tutti i linguaggi, il programmatore è responsabile di decidere quando e dove usare strutture di sincronizzazione, con risultati potenzialmente errati.</p>
+<p>In <strong>Rust</strong>, invece, il <strong>Borrow Checker</strong> (avvalendosi anche di <strong>tratti</strong> che specificano la condivisibilità o meno di determinati tipi di dato tra più thread), <strong>impedisce la compilazione</strong> di programmi che potrebbero generare problemi di interferenza tra thread (per questo motivo, in Rust, non sono ammesse variabili globali mutabili). Ciononostante, sono <strong>ancora possibili</strong> altre forme di errore, ad esempio i <strong>deadlock</strong>.</p>
+<p>Per via della protezione aggiuntiva garantita dal Borrow Checker, l'approccio di Rust alla concorrenza è detto <strong>fearless concurrency</strong>.</p>
+<h3 id="thread-in-rust">Thread in Rust</h3>
+<p><img src="assets/thread_rust.png" alt="thread in rust"></p>
+<p>Per creare un thread in Rust si usa la funzione <code>std::thread::spawn()</code>, che accetta come parametro una closure senza parametri e restituisce una struct di tipo <code>std::thread::JoinHandle&lt;T&gt;</code>, dove <code>T</code> il tipo restituito dalla closure. Quando si usa il metodo <code>join()</code> sulla handle di un certo thread si attende la terminazione di quel thread. <code>join()</code> restituisce un <code>Result&lt;T,E&gt;</code>, che può incapsulare nel valore <code>Ok</code> il dato di tipo <code>T</code> ritornato dal thread con successo, oppure, nel valore <code>Err</code>, il valore eventualmente passato come parametro alla <code>panic!</code> invocata dentro il thread.</p>
+<p><strong>Tutti i thread creati sono paritetici</strong>, senza rapporti di parentela tra thread creatore e creato; non occorre che l'uno sopravviva all'altro (se però il main thread termina senza attendere gli altri thread, termina l'intero processo). L'uscita dallo scope della handle di un thread non comporta la sua terminazione: semplicemente non c'è più modo, dal thread chiamante, di sincronizzarsi con lui, ricevere il risultato della sua computazione o di conoscere il suo stato.</p>
+<p>Spesso, la closure passata a <code>thread::spawn()</code> utilizza la parola chiave <code>move</code>, che fa sì che la cattura delle eventuali variabili avvenga per valore, non per riferimento, perché se un thread catturasse dei riferimenti a variabili di altri thread, non ci sarebbero garanzie sulla validità del riferimento per tutta la durata dell'esecuzione del thread. Di conseguenza, il programma non verrebbe compilato (a meno di non usare gli scoped thread).</p>
+<p>Un thread può anche essere configurato tramite la struct <code>std::thread::Builder</code>, che consente, tra le altre cose, di dare un nome specifico al thread (utile in fase di debug) e di specificare la dimensione dello stack del thread (utile se occorre chiamare funzioni con ricorsione particolarmente profonda).</p>
+<h3 id="i-tratti-della-concorrenza">I tratti della concorrenza</h3>
+<p>La closure passata al thread può prendere possesso di:</p>
+<ul>
+<li>Tutte le variabili il cui tipo implementa il tratto <code>Send</code></li>
+<li>Reference dei tipi che implementano il tratto <code>Sync</code></li>
+</ul>
+<p>entrambi i tratti sono 'marker', come <code>Copy</code>, ossia non specificano metodi: servono solo per evidenziare che un certo tipo gode di certe proprietà. <code>Send</code> e <code>Sync</code> sono implementati da quasi tutti i tipi standard - esempio i32, bool, &amp;str, String, ... - (<code>Sync</code> non è implementato da Rc e RefCell perché non possono essere condivisi tra thread).</p>
+<ul>
+<li>Se un tipo <code>T</code> gode del tratto <code>Send</code>, significa che può essere ceduto a un thread.</li>
+<li>Se un tipo <code>T</code> è <code>Sync</code>, questo significa che un suo reference in sola lettura, <code>&amp;T</code>, è <code>Send</code>: visto che i reference <code>&amp;</code> sono <code>Copy</code>, questo significa che un tipo <code>Sync</code> è condivisibile in lettura tra più thread.</li>
+</ul>
+<p>Una struct eredita automaticamente i tratti <code>Send</code> o <code>Sync</code>, se tutti i campi interni li implementano.</p>
+<p>I tratti <code>Send</code> e <code>Sync</code> sono dichiarati unsafe, pur essendo vuoti.</p>
+<h3 id="modelli-di-concorrenza">Modelli di concorrenza</h3>
+<p>Rust mette a disposizione due approcci per gestire la concorrenza:</p>
+<ol>
+<li><strong>Condivisione dello stato</strong>, l'approccio più tradizionale, in cui la condivisione dei dati si ottiene grazie all'utilizzo combinato di Mutex e condition variable.</li>
+<li><strong>Scambio di messaggi</strong>, più tipico di Rust, che non prevede la condivisione di variabili, a parte i canali di comunicazione. Si tratta di mezzi unidirezionali con un ingresso, condivisibile tra più thread, e un'uscita, posseduta da un solo thread, in cui la proprietà dei dati inseriti viene trasferita al destinatario (esistono anche librerie di terze parti che permettono di utilizzare canali più complessi). Questo modello permette di risolvere un sottoinsieme dei problemi trattabili con l'approccio tradizionale.</li>
+</ol>
+<h3 id="condivisione-dello-stato">Condivisione dello stato</h3>
+<p>L'approccio fa uso di Mutex, un'astrazione che <strong>incapsula un dato condiviso</strong> e permette a vari thread di accedervi uno alla volta (in altri linguaggi, come C++, Mutex e dati protetti sono oggetti indipendenti). Un Mutex permette di effettuare le operazioni di <em>lock</em> e <em>unlock</em>. Lock permette a un thread di acquisire momentaneamente il possesso del Mutex, se non posseduto da altri in quel momento, altrimenti si blocca finché il Mutex non viene rilasciato da un altro thread tramite l'operazione di Unlock. Particolari implementazioni dei Mutex, es. Timed Mutex, permettono di impostare un tempo massimo di attesa.</p>
+<p>Ogni thread ha l'impegno a:</p>
+<ul>
+<li>Non accedere a variabili condivise senza prima avere acquisito il Mutex</li>
+<li>Rilasciare il Mutex non appena la variabile condivisa non è più necessaria, nel minor tempo possibile</li>
+</ul>
+<blockquote>
+<p>Nota: Il Mutex utilizza internamente istruzioni fence/barrier, che garantiscono la correttezza delle operazioni di lettura e scrittura di variabili condivise, invalidando il contenuto della cache (lettura) e forzando il flush sulla RAM (scrittura); quindi, un Mutex è <strong>sempre</strong> necessario per accedere a una variabile condivisa, anche se un particolare thread deve accedervi solo in lettura.</p>
+</blockquote>
+<p>In alcuni linguaggi, come C++, il programmatore deve esplicitamente:</p>
+<ol>
+<li>Riconoscere le variabili condivise</li>
+<li>Accedere alle variabili condivise sempre e solo tramite Mutex</li>
+<li>Rilasciare sempre il Mutex</li>
+</ol>
+<p>Questo approccio, però, può essere causa di alcuni problemi. Ad esempio, consideriamo il seguente frammento di codice C++:</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">std</span>::<span class="hljs-built_in">list</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-built_in">list</span>;
+<span class="hljs-built_in">std</span>::Mutex m;
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i)</span></span>{ 
+    m.lock();
+    <span class="hljs-built_in">list</span>.push_back(i);
+    m.unlock();
+}
+</div></code></pre>
+<p>Se il metodo <code>push_back()</code> scatenasse un'eccezione, il normale flusso di esecuzione verrebbe interrotto e il lock <code>m</code> non verrebbe mai rilasciato (a meno che l'eccezione non venga immediatamente gestita con try/catch).</p>
+<p>Per questo motivo, C++ mette a disposizione altre classi, come <code>std::lock_guard</code> che incapsula un <code>std::Mutex</code> e si utilizza come variabile locale, non globale come in precedenza. Ciò permette di usare il <strong>pattern RAII</strong>, che evita al programmatore di dover chiamare esplicitamente Unlock: quando il <code>lock_guard</code> esce dallo scope (anche per via di un'eccezione), interviene automaticamente il suo distruttore che rilascia il Mutex.</p>
+<p>Tuttavia, <code>lock_guard</code> e oggetto da proteggere sono due oggetti indipendenti ed è responsabilità del programmatore accoppiarli in maniera corretta e rispettare i vincoli di accesso: <strong>il compilatore non può intervenire</strong> per garantire che ogni accesso avvenga tramite il Mutex.</p>
+<h3 id="condivisione-dello-stato-in-rust">Condivisione dello stato in Rust</h3>
+<p>In Rust, il <strong>dato da condividere è incapsulato all'interno del Mutex</strong> come campo privato, accessibile solo tramite i metodi forniti dal Mutex.</p>
+<p>Il metodo <code>lock()</code> restituisce un <code>LockResult&lt;MutexGuard&lt;T&gt;&gt;</code>, dove <code>MutexGuard&lt;T&gt;</code> è uno <strong>smart pointer</strong> al dato incapsulato. Il rilascio del Mutex avviene quando il <code>MutexGuard&lt;T&gt;</code> esce dallo scope o viene distrutto tramite la funzione <code>drop()</code>.</p>
+<p>L'oggetto di tipo <code>Mutex&lt;T&gt;</code> contiene:</p>
+<ul>
+<li>Il <strong>dato da proteggere</strong>, di tipo <code>T</code> (all'interno di una <code>UnsafeCell&lt;T&gt;</code>)</li>
+<li>Il <strong>Mutex vero e proprio</strong>, fornito dal SO</li>
+<li>Il <strong>flag Poison</strong>, che serve per capire se il Mutex sia stato rilasciato 'bene' o 'male', ovvero se si sia verificato un panic che potrebbe aver danneggiato la struttura dati interna al Mutex.</li>
+</ul>
+<p>Il <code>LockResult</code> (un particolare alias per Result) può assumere il valore <code>Ok</code>, contenente lo smart pointer, o il valore <code>Err</code> contenente un <code>PoisonError</code>, restituito se il flag Poison è attivo.</p>
+<p>Il modo più comune per condividere un <code>Mutex&lt;T&gt;</code> tra più thread, è quello di incapsularlo all'interno di un <code>Arc</code>, che consente di avere più proprietari (come <code>Rc</code>, ma thread-safe), cosicché il Mutex sia allocato nello heap (<code>Arc::new(Mutex::new(...))</code>).</p>
+<h3 id="lifetime-dei-riferimenti-nei-thread">Lifetime dei riferimenti nei thread</h3>
+<p>Un'altra questione da risolvere è legata alla cattura delle variabili per riferimento da parte della closure passata come parametro alla <code>std::thread::spawn()</code>.</p>
+<p>Il Borrow Checker permette il passaggio di un riferimento come parametro a una funzione perché riesce a dimostrare la sua validità per tutta la durata dell'esecuzione della funzione chiamata; questo perché il chiamante rimane bloccato, e quindi il dato puntato dal reference non può cessare di esistere prima che termini la funzione.</p>
+<p>Il problema è differente nel caso dei thread: se un thread passa un reference a un altro thread, non ci sono garanzie riguardo la validità del riferimento durante tutta l'esecuzione del secondo thread, perché il primo thread continua la propria esecuzione (la variabile puntata potrebbe essere stata distrutta nel frattempo) e l'avanzamento relativo tra i thread non è predicibile.</p>
+<p>Senza usare accorgimenti particolari, dunque, non è possibile passare riferimenti a un altro thread.</p>
+<h3 id="thread-con-stdthreadscope">Thread con std::thread::scope</h3>
+<p>Rust mette a disposizione una modalità differente per creare dei thread, ovvero <code>std::thread::scope(|s| {...})</code>, che permette il passaggio di riferimenti tra un thread e un altro.</p>
+<p>La funzione <code>scope()</code> non crea un thread, ma un ambiente (scope), quello della closure passata come parametro, in cui possono essere creati dei thread, a partire dal parametro <code>s</code> (su cui si può chiamare il metodo <code>spawn()</code>, come per <code>std::thread</code>);</p>
+<p>Quando la <code>scope()</code> viene chiamata, il chiamante rimane bloccato, come per qualsiasi altra funzione, e Rust garantisce che tale funzione <strong>attenda la terminazione di tutti i thread creati al suo interno</strong> prima di ritornare.</p>
+<p>Questo approccio offre garanzie sulla validità dei reference: se sono validi appena catturati dalla closure, allora continueranno ad esserlo per tutta la durata di esecuzione dei thread interni allo scope.</p>
+<p>Questa soluzione permette di utilizzare un Mutex in maniera differente: invece di essere incapsulato in un <code>Arc</code> (e quindi allocato nello heap), <strong>un Mutex si può dichiarare come variabile locale del thread chiamante</strong>, prima della chiamata a <code>std::thread::scope()</code>. Poiché i metodi di un oggetto Mutex non ne richiedono il possesso (grazie alla <code>UnsafeCell</code> che racchiude il dato protetto), la closure cattura solo un reference immutabile al Mutex stesso.</p>
+<blockquote>
+<p>Nota: una struct può essere modificata anche se si ha a disposizione solo un suo reference immutabile (<code>&amp;</code>), utilizzando dei puntatori unsafe (<code>*mut</code>), non soggetti ai controlli del Borrow Checker.</p>
+</blockquote>
+<h3 id="alternativa-a-mutext-rwlockt">Alternativa a Mutex&lt;T&gt;: RwLock&lt;T&gt;</h3>
+<p>Un oggetto <code>Mutex&lt;T&gt;</code> in alcune situazioni potrebbe essere troppo restrittivo: se si vuole permettere accesso simultaneo in lettura a più thread, mantenendo invece esclusivo l'accesso in scrittura, è possibile utilizzare un <code>RwLock&lt;T&gt;</code> che ha due metodi separati per leggere e scrivere il dato incapsulato, <code>read()</code> e <code>write()</code>;</p>
+<h3 id="attese-condizionate">Attese condizionate</h3>
+<p>A volte, la problematica di sincronizzazione non riguarda il dover gestire l'accesso agli stessi dati da parte di più thread, quanto il dover permettere a un thread di <strong>eseguire determinate azioni</strong> solo dopo il <strong>verificarsi di una certa condizione</strong>, causata da un altro thread. Non sempre questa condizione coincide con la terminazione di un thread, per cui l'utilizzo della <code>join()</code> potrebbe non essere sufficiente.</p>
+<p>Una soluzione banale potrebbe essere quella di controllare periodicamente (<strong>polling</strong>) il valore di una variabile di segnalazione condivisa, protetta tramite un Mutex. Tuttavia, tale approccio è altamente inefficiente, in quanto:</p>
+<ul>
+<li>consuma inutilmente <strong>cicli macchina ed energia</strong></li>
+<li>introduce una <strong>latenza</strong> tra il momento in cui avviene la segnalazione da parte del primo thread e il momento in cui la variabile viene letta dal secondo thread.</li>
+</ul>
+<p>Ridurre uno dei due problemi significa peggiorare l'altro:</p>
+<ul>
+<li>L'aumento della frequenza di polling implica una riduzione della latenza media, ma anche l'aumento dello spreco di CPU;</li>
+<li>La riduzione della frequenza di polling implica una riduzione dello spreco di CPU, ma anche l'aumento della latenza media.</li>
+</ul>
+<p>La soluzione migliore è quella di usare oggetti appositi forniti dal SO, detti <strong>Condition Variable</strong>, il cui scopo è quello di bloccare l'esecuzione del thread corrente finché non si verifica una certa condizione. In Rust, tale oggetto è fornito dal modulo <code>std::sync::Condvar</code>.</p>
+<p>Una condition variable deve essere condivisa tra thread, uno dei quali si mette in attesa con il metodo <code>wait()</code>, che lo blocca per un tempo indefinito, finché un altro thread, sulla stessa condition variable, chiama il metodo <code>notify()</code>.</p>
+<p>Quindi, l'uso di una <strong>condition variable presuppone sempre l'esistenza di almeno due thread</strong> che la conoscano: uno che si mette in attesa e l'altro che lo risveglia.</p>
+<p>Da sola, una condition variable non consente di specificare o conoscere il motivo per cui sia stata chiamata la <code>notify()</code> da un altro thread. Per questa ragione (e per la possibilità di <a href="#notifiche-spurie">notifiche spurie</a>), <strong>le condition variable sono sempre accompagnate da un Mutex</strong> che protegge una variabile condivisa (spesso booleana, ma non necessariamente), utilizzabile dal thread risvegliato dalla <code>notify()</code>, per determinare se possa procedere o se debba 'riaddormentarsi'.</p>
+<p>Ogni <code>Condvar</code> deve obbligatoriamente essere <strong>associata a uno e un solo Mutex</strong> per essere utilizzata, anche se i due oggetti esistono separatamente. Il metodo <code>wait()</code> della <code>Condvar</code> prende come parametro un <code>MutexGuard&lt;T&gt;</code>, consumandolo.</p>
+<h3 id="metodi-principali-di-condvar">Metodi principali di Condvar</h3>
+<ul>
+<li><code>fn new() -&gt; Condvar</code>: crea una nuova istanza.</li>
+<li><code>fn wait&lt;'a, T&gt;(&amp;self, guard: MutexGuard&lt;'a, T&gt;) -&gt; LockResult&lt;MutexGuard&lt;'a, T&gt;&gt;</code>: sospende il thread corrente fino alla ricezione di una notifica. Il parametro MutexGuard è richiesto perché occorre la garanzia che il lock sulla variabile condivisa sia rilasciato a beneficio degli altri thread (si presuppone che prima di chiamare <code>wait()</code>, il thread abbia controllato il valore della variabile di segnalazione, acquisendo il lock). Il MutexGuard passato come parametro viene infatti invalidato dalla <code>wait()</code> prima di sospendere il thread e riabilitato solo al risveglio del thread, prima di uscire dalla <code>wait()</code> stessa, che restituisce il MutexGuard.</li>
+<li><code>fn notify_one(&amp;self)</code>: sveglia un thread a caso tra quelli in attesa sulla <code>Condvar</code>.</li>
+<li><code>fn notify_all(&amp;self)</code>: sveglia tutti i thread in attesa sulla <code>Condvar</code>, che usciranno dalla wait possedendo il lock, uno per volta.</li>
+</ul>
+<h3 id="notifiche-spurie">Notifiche spurie</h3>
+<p>Il meccanismo di funzionamento del metodo <code>wait()</code> è tale per cui a volte un thread potrebbe uscire dallo stato di sleep anche senza essere stato notificato da nessuno: si parla di <strong>notifiche spurie</strong>, non dovute al linguaggio ma al SO. Per questo motivo, il thread che riceve una notifica deve sempre verificare di essere stato effettivamente risvegliato da qualcuno, controllando il valore della variabile condivisa e, se necessario, chiamare nuovamente la <code>wait()</code>.</p>
+<p>Dal punto di vista del codice, questo si traduce nel fatto che la chiamata alla <code>wait()</code> è sempre racchiusa all'interno di un ciclo.</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// cvar è una condvar</span>
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> started = mutex.lock().unwrap();
+<span class="hljs-comment">//started è mut perché dopo viene riassegnata</span>
+<span class="hljs-keyword">while</span> !*started {
+  started = cvar.wait(started).unwrap();
+}
+</div></code></pre>
+<p>Data la frequenza di utilizzo di questo pattern, oltre al metodo <code>wait()</code>, è disponibile il metodo <code>wait_while()</code>, che prende come parametri il MutexGuard che punta al dato condiviso e una closure che lo accetta in ingresso e testa il valore del dato puntato, restituendo un booleano: se viene restituito <code>true</code>, allora il thread si riaddormenta, altrimenti esce dall'attesa.</p>
+<h3 id="notifiche-perse">Notifiche perse</h3>
+<p>Il meccanismo delle notifiche presenta un altro problema: se un thread chiama <code>notify_one()</code> o <code>notify_all()</code> e nessuno ha ancora chiamato la <code>wait()</code> su quella condvar, la notifica viene persa: tuttavia, questo non è un problema, perché il pattern descritto sopra specifica che (sia nel caso del semplice ciclo while, sia nel caso della <code>wait_while()</code>) la prima operazione da fare è quella di testare la variabile condivisa, prima di chiamare la <code>wait()</code> (se la notifica è inviata prima che il thread abbia raggiunto la <code>wait()</code>, significa che la variabile di segnalazione ha già raggiunto il valore finale, quindi non è necessario attendere).</p>
+<h3 id="attesa-temporizzata">Attesa temporizzata</h3>
+<p>Esistono dei casi in cui l'uscita dalla <code>wait()</code> deve essere determinata indistintamente da una delle seguenti condizioni:</p>
+<ul>
+<li>arrivo di una notifica</li>
+<li>scadenza di un timeout</li>
+</ul>
+<p>Per gestire queste situazioni esistono dei metodi appositi, che sono <code>wait_timeout()</code> e <code>wait_timeout_while()</code>, che accettano, rispetto ai precedenti <code>wait()</code> e <code>wait_while()</code> un parametro aggiuntivo di tipo <code>Duration</code>, che specifica il tempo massimo di attesa prima del risveglio e restituiscono una tupla <code>(MutexGuard&lt;'a, T&gt;, WaitTimeoutResult)</code>, dove l'oggetto di tipo <code>WaitTimeoutResult</code> permette di capire, tramite il metodo <code>timed_out()</code> se l'uscita dalla <code>wait()</code> sia stata causata dallo scadere del timeout (in ogni caso il lock viene sempre riacquisito).</p>
+<h3 id="condivisione-di-messaggi">Condivisione di messaggi</h3>
+<p>L'approccio basato sulla condivisione dello stato (condivisione delle variabili) si adatta bene a un paradigma di tipo imperativo: si modifica lo stato, lo si legge e, di conseguenza si effettuano certe azioni. Per contro, l'approccio basato sulla condivisione di messaggi, è più vicino alla programmazione funzionale, che opera perlopiù su dati immutabili e sfrutta ingressi e uscite delle funzioni per trasformarli.</p>
+<p>Questo approccio si basa su una primitiva elementare detta 'channel', ossia un 'tubo' a due estremità, quella di ingresso e quella di uscita. <strong>All'interno di un channel sono presenti dei messaggi, in quantità potenzialmente illimitata</strong>. Chi possiede l'estremità di ingresso può produrre messaggi e cederli al canale (l'ordine viene mantenuto); tali messaggi rimangono lì finché non vengono letti da qualcuno, che a sua volta ne acquisisce il possesso. L'operazione di lettura se il canale è vuoto è efficiente, perché non comporta l'utilizzo di CPU.</p>
+<p>La libreria standard di Rust mette a disposizione la funzione <code>std::sync::mpsc::channel&lt;T&gt;()</code>, che ritorna una tupla del tipo <code>(Sender&lt;T&gt;, Receiver&lt;T&gt;)</code>. Il canale creato è omogeneo, vale a dire, contiene dati tutti dello stesso tipo. I due oggetti vengono poi passati a thread differenti. L'oggetto <code>Sender&lt;T&gt;</code> ha un solo metodo, <code>send()</code>, che serve per scrivere sul canale, mentre l'oggetto <code>Receiver&lt;T&gt;</code> ha anch'esso un solo metodo, <code>recv()</code>, che serve a leggere dal canale.</p>
+<p>La funzione <code>channel()</code> fa parte del modulo <code>mpsc</code>, che sta per <strong>multiple producers - single consumer</strong>: solo un thread può leggere (consumare) dal canale ma molti thread possono scrivere (produrre), quindi l'oggetto <strong><code>Sender&lt;T&gt;</code> è clonabile</strong> (tramite il metodo <code>clone()</code>), a differenza dell'oggetto <code>Receiver&lt;T&gt;</code>.</p>
+<p>Un channel ha anche un'altra proprietà: quando tutti i <strong>sender sono stati distrutti e il canale si è svuotato, il receiver in attesa riceve un errore</strong>, di tipo <code>RecvError</code>, che lo avvisa che non potrà più ricevere nulla tramite quel canale. Non è quindi necessario conoscere a priori il numero di messaggi da ricevere. Viceversa, <strong>se l'unico receiver viene distrutto, i sender ricevono un errore all'invio</strong>, di tipo <code>SendError&lt;T&gt;</code>.</p>
+<blockquote>
+<p>Nota: sebbene il meccanismo basato sullo scambio di messaggi sia molto semplice, esso non permette di realizzare qualsiasi programma concorrente, a differenza dell'approccio basato sull'utilizzo combinato di Mutex e CondVar, più generale.</p>
+</blockquote>
+<p>Nell'approccio basato sullo scambio di messaggi, il sender cede la proprietà del dato al canale, che a sua volta la cede al ricevitore. Questo permette di ottenere contemporaneamente:</p>
+<ol>
+<li><strong>Comunicazione</strong> tra sender e receiver;</li>
+<li><strong>Sincronizzazione implicita</strong>, perché il dato viene necessariamente letto successivamente all'invio, per costruzione;</li>
+</ol>
+<p>Esempio di utilizzo di <code>channel&lt;T&gt;</code>:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">use</span> std::sync::mpsc::channel;
+<span class="hljs-keyword">use</span> std::thread;
+
+<span class="hljs-keyword">let</span> (tx, rx) = channel();
+
+<span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-number">0</span>..<span class="hljs-number">3</span> {
+  <span class="hljs-keyword">let</span> tx = tx.clone();
+  <span class="hljs-comment">/*i nuovi tx sono distrutti alla terminazione dei rispettivi thread*/</span>
+  thread::spawn(<span class="hljs-keyword">move</span> || tx.send(<span class="hljs-string">"ok"</span>).unwrap());
+}
+
+<span class="hljs-comment">/*distruzione dell'ultimo tx, altrimenti il receiver non si fermerà mai*/</span>
+<span class="hljs-built_in">drop</span>(tx);
+
+<span class="hljs-comment">/*Operazioni del ricevitore sui dati*/</span>
+<span class="hljs-keyword">while</span> <span class="hljs-keyword">let</span> <span class="hljs-literal">Ok</span>(msg) = rx.recv() {
+  <span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, msg);
+}
+</div></code></pre>
+<h3 id="canali-sincroni">Canali sincroni</h3>
+<p>Il tipo di canale restituito da <code>std::sync::mpsc::channel&lt;T&gt;()</code> ha dimensione illimitata (<em>unbounded</em>); Nel caso in cui si scriva nel canale molto più velocemente di quanto si consumino i dati prodotti, è possibile che esso assuma dimensioni considerevoli.</p>
+<p>Nelle situazioni in cui ciò non è accettabile, si usa un tipo diverso di canale, detto <strong>sincrono</strong> (semi-sincrono, in realtà), che usa un meccanismo di back-pressure per limitare la quantità massima di messaggi che possono essere inseriti nel canale senza essere consumati. Questo tipo di canale è accessibile in Rust usando la funzione <code>std::sync::mpsc::sync_channel&lt;T&gt;(bound: usize)</code>, che restituisce una tupla di tipo <code>(SyncSender&lt;T&gt;, Receiver&lt;T&gt;)</code>. Il parametro aggiuntivo <code>bound</code> rappresenta il limite massimo di messaggi che il canale può contenere. Se un <code>SyncSender&lt;T&gt;</code> cerca di scrivere quando il canale è pieno, viene posto in attesa bloccante (senza ricevere errori).</p>
+<p>Il <strong>caso limite</strong> è quello in cui la <strong>bound = 0</strong>, e in tal caso il canale è detto <strong>rendez-vous channel</strong>: se un <code>SyncSender&lt;T&gt;</code> cerca di scrivere rimane sempre bloccato fin quando un <code>Receiver&lt;T&gt;</code> non decide di leggere, e viceversa. Il rendez-vous channel non prevede quindi bufferizzazione.</p>
+<h3 id="libreria-crossbeam">Libreria Crossbeam</h3>
+<p>Esistono altre librerie, oltre alla libreria <code>std</code> di Rust, che estendono i costrutti di sincronizzazione visti finora. Tra queste, la libreria Crossbeam, che offre:</p>
+<ul>
+<li>Costrutti atomici: <code>crossbeam::atomic::AtomicCell&lt;T&gt;</code> funziona come una <code>Cell&lt;T&gt;</code>, <strong>con mutabilità interna</strong>, ma adatta anche a contesti <strong>multithread</strong>, grazie all'utilizzo di primitive atomiche, ove disponibili, o di Mutex interni, nel caso di strutture dati più complesse;</li>
+<li>Canali MPMC (multiple producer - multiple consumer): le funzioni <code>crossbeam::channel::{bounded(), unbounded()}</code> creano canali unidirezionali in cui <strong>anche il receiver può essere clonato</strong>, quindi la lettura può essere suddivisa tra più thread, in maniera più o meno uniforme. È anche possibile ascoltare in parallelo più canali. Sono possibili anche particolari <strong>canali senza ingressi, ma solo uscite</strong>, forniti dalle funzioni <code>crossbeam::channel::{after(), tick()}</code> che si occupano, rispettivamente, di <strong>fornire un dato dopo un tempo indicato, oppure periodicamente</strong></li>
+</ul>
+<h3 id="uso-della-libreria-crossbeam">Uso della libreria Crossbeam</h3>
+<p>I canali MPMC rappresentano una astrazione utile per l'implementazione di alcuni pattern:</p>
+<ul>
+<li>
+<p><strong>Fan-out/Fan-in</strong>: Un thread produce dei dati, che vengono poi distribuiti su più worker thread per l'elaborazione, e nuovamente raccolti in un unico punto. <img src="assets/fanout_fanin.png" alt="fanout-fanin"> Il pattern può essere implementato utilizzando due canali, senza mutex espliciti.</p>
+</li>
+<li>
+<p><strong>Pipeline</strong>: Un procedimento sufficientemente complesso, viene suddiviso in trasformazioni successive più semplici in cascata. <img src="assets/pipeline.png" alt="pipeline"> Alcuni stadi della pipeline, se necessario, possono ricorrere al paradigma fan-out/fan-in.</p>
+</li>
+<li>
+<p><strong>Producer/Consumer</strong>: Utilizzato quando si hanno più thread produttori e più thread consumatori. <img src="assets/producer_consumer.png" alt="producer-consumer"></p>
+</li>
+</ul>
+<h3 id="il-modello-degli-attori">Il modello degli attori</h3>
+<p>Un <strong>attore</strong> è un oggetto attivo che mantiene al suo interno un canale e consuma i dati ricevuti da altri, in maniera asincrona, tramite il canale stesso. Un esempio di applicazione di questo modello è quello delle finestre di Windows (o le GUI, in generale), oggetti dotati di una <strong>mailbox</strong> in cui vengono depositati in maniera asincrona dei messaggi (es: 'resize', 'move', ...), che vengono poi consumati da un thread secondo l'approccio FIFO. Una libreria Rust che implementa questa idea è <code>actix</code>.</p>
+<h2 id="concorrenza-inter-processo">Concorrenza inter-processo</h2>
+<p>Consideriamo adesso la concorrenza inter-processo, ovvero tra processi differenti in esecuzione, nel linguaggio Rust.</p>
+<p><strong>Un processo è l'unità base di esecuzione di un applicazione, nel contesto di un sistema operativo</strong>. Ad ogni processo, il SO assegna un identificatore univoco, detto <strong>Process ID</strong> o <strong>PID</strong>. Ogni processo ha il proprio spazio di indirizzamento, all'interno del quale operano <strong>uno o più thread</strong>, in cui il kernel può rendere disponibili <strong>handle per accedere a determinate risorse</strong> (per esempio file descriptor, handle dei thread e dei processi, ...). La separazione degli spazi di indirizzamento garantisce un naturale <strong>isolamento</strong> dei singoli processi che, almeno in parte, non si 'disturbano' a vicenda; un indirizzo logico di memoria utilizzato in un processo è privo di significato nel contesto di un processo differente.</p>
+<p><strong>L'isolamento, tuttavia, è solo parziale</strong>, perché alcune astrazioni offerte dal SO sono spesso comuni a più processi differenti, per cui possono ancora verificarsi collisioni, ad esempio, se più processi cercano simultaneamente di:</p>
+<ul>
+<li>Scrivere lo stesso file</li>
+<li>Aprire un socket sulla stessa porta sorgente, con lo stesso protocollo di livello trasporto</li>
+<li>Accedere a una stessa periferica</li>
+<li>...</li>
+</ul>
+<p>Per ovviare al problema, è stato ideato il concetto di <strong>container</strong> (es. Docker), che garantisce una separazione completa, con scissione delle tabelle kernel.</p>
+<p>L'isolamento anche solo parziale, comunque, è sufficiente a far sì che, senza appoggiarsi a strutture esterne (come i file), un processo non possa spostare i propri dati verso un altro processo.</p>
+<p>Volendo far comunicare processi differenti, si rende necessario l'utilizzo di alcuni meccanismi messi a disposizione dal SO, che collettivamente prendono il nome di <strong>Inter-Process Communication</strong> o <strong>IPC</strong>.</p>
+<p>Il primo ostacolo nella IPC è costituito dal fatto che <strong>le informazioni scambiate tra processi non possono mai fare riferimento a indirizzi di memoria</strong>, perché indirizzi logici di memoria validi in un processo sono privi di significato in un processo differente. Questa limitazione rende complicato trasferire strutture dati che fanno largo uso di puntatori (es. hash table, grafi, linked list...), che devono dapprima subire un processo di trasformazione (<strong>esternalizzazione</strong> o <strong>marshalling</strong> o <strong>serializzazione</strong>) per assumere una struttura indipendente dallo spazio di indirizzamento, senza puntatori (es. oggetti JSON, se possibile. JSON non è tuttavia sempre adatto: ad esempio, non è possibile rappresentare grafi, solo alberi). La necessità di trasformare le strutture dati rende la <strong>IPC costosa</strong>.</p>
+<p>Sebbene i thread siano più indicati quando occorre condividere dati, esistono situazioni in cui <strong>non è possibile o conveniente usare lo stesso spazio di indirizzamento</strong>.</p>
+<p>Ad esempio, bisogna impiegare la IPC quando occorre riutilizzare un <strong>programma già esistente</strong> del quale non si ha il controllo, che permette di comunicare solo attraverso interfacce prestabilite.</p>
+<p>In altri casi, si usano processi differenti per <strong>ragioni di sicurezza</strong>: in questi casi la separazione degli spazi di indirizzamento non è un ostacolo, ma una caratteristica necessaria (esempio: tab di Google Chrome).</p>
+<p>Un terzo caso in cui si usano più processi, invece che più thread, è quello in cui si vuole distribuire il carico applicativo su <strong>più macchine differenti, comunicanti attraverso la rete</strong>.</p>
+<h3 id="creazione-di-processi">Creazione di processi</h3>
+<p>Alla creazione di un processo, che avviene per mezzo di primitive offerte dal SO, diverse per ciascun SO, viene creato anche un thread, detto <strong>primary thread</strong>, che rappresenta il flusso di esecuzione principale per quel processo.</p>
+<p>In Windows, la primitiva da usare è <code>CreateProcess()</code>, che inizializza il processo con l'immagine di un eseguibile e attiva il primary thread. La <code>CreateProcess()</code> è una funzione complicata, che accetta molti parametri. Tutti i processi così creati sono paritetici, senza relazioni di parentela.</p>
+<p>In Linux, la creazione di un processo avviene per mezzo della system call <code>fork()</code>, che crea una copia dello spazio di indirizzamento del processo genitore (stack già popolato, heap con memoria allocata, ...) e fa anche sì che il processo creato condivida con il processo genitore le stesse pagine fisiche, almeno inizialmente, fintanto che uno tra i due processi non ha necessità di apportare modifiche. In tal caso, viene abilitato il meccanismo di <strong>Copy On Write</strong>, che duplica la pagina.</p>
+<p>A causa del suo meccanismo di funzionamento, l'uso di <code>fork()</code> è complicato e presenta una serie di problemi.</p>
+<p>Supponiamo di avere un processo con una serie di thread già attivi e che uno di essi chiami la funzione <code>fork()</code>; il processo figlio che verrà generato avrà un unico thread attivo, il gemello di quello che aveva invocato la <code>fork()</code>, mentre tutti gli altri non saranno presenti (continueranno invece a esistere nel processo padre). Questa situazione può essere problematica in alcuni casi: se, per esempio, il processo figlio, con il suo unico thread, ereditasse dal padre un Mutex bloccato, non ci sarebbe possibilità di sbloccarlo, vista l'assenza degli altri thread.</p>
+<p>Per questo motivo, in Linux, nel caso di più processi con più thread è opportuno, tipicamente all'inizio del programma, utilizzare la funzione:</p>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">pthread_atfork</span><span class="hljs-params">(
+  <span class="hljs-keyword">void</span> (*<span class="hljs-built_in">prepare</span>)(<span class="hljs-keyword">void</span>),
+  <span class="hljs-keyword">void</span> (*parent)(<span class="hljs-keyword">void</span>),
+  <span class="hljs-keyword">void</span> (*child)(<span class="hljs-keyword">void</span>)
+)</span></span>;
+</div></code></pre>
+<p>la quale accetta come parametri tre funzioni, che vengono registrate e chiamate nel momento in cui si effettua la <code>fork()</code>.</p>
+<ul>
+<li><code>prepare()</code> viene chiamata prima di effettuare la <code>fork()</code> e ha come scopo quello di fermare gli altri thread;</li>
+<li><code>parent()</code> e <code>child()</code> vengono eseguite successivamente al completamento della <code>fork()</code>, rispettivamente nel processo padre e nel processo figlio e servono per far ripartire i thread precedentemente fermati, nel caso della <code>parent()</code> e a creare quelli necessari nel caso della <code>child()</code>.</li>
+</ul>
+<p>Oggi, tuttavia, la <code>fork()</code> non viene praticamente più utilizzata per ottenere un clone del processo corrente, ma in combinazione con le funzioni <code>exec*()</code> per creare un processo pulito. Questa classe di funzioni permette di sostituire l'attuale immagine in memoria del processo reinizializzandola con quella dell'eseguibile specificato come parametro. Esistono più varianti di <code>exec</code>, che differiscono solo per il modo di gestire i parametri.</p>
+<p>Anche se il funzionamento è parecchio diverso, almeno dal punto di vista logico, è come se la <code>CreateProcess()</code> di Windows equivalesse a una <code>fork()</code> seguita da una <code>exec()</code> nel processo figlio.</p>
+<h3 id="terminazione-di-processi">Terminazione di processi</h3>
+<p>Un processo può terminare:</p>
+<ul>
+<li>di propria volontà</li>
+<li>per cause esterne</li>
+</ul>
+<blockquote>
+<p>Nota: in Rust, la terminazione del main thread causa la terminazione dell'intero processo, per cui è necessario attendere esplicitamente gli altri thread attivi con il metodo <code>join()</code>.</p>
+</blockquote>
+<p>Esistono opportune system call, <code>_exit(int status)</code> in Linux e <code>ExitProcess(int status)</code> in Windows, che possono essere invocate da uno qualsiasi dei thread e permettono di richiedere la terminazione del processo corrente, e quindi la deallocazione di tutte le risorse concesse dal SO (file descriptor, lock, socket, ...).</p>
+<p>È importante notare una differenza tra Windows e Linux riguardo la gestione dei processi:</p>
+<ul>
+<li>In Windows non si ha una vera e propria gerarchia dei processi: non c'è distinzione tra processo 'padre' e 'figlio'</li>
+<li>In Linux i processi sono gerarchici: per tutti i processi, eccetto 'init', con PID 1, si può sempre individuare un processo padre. Ogni processo, prima di terminare, è tenuto ad attendere la terminazione di tutti i processi figli; se il padre termina prima di un processo figlio, quest'ultimo assume lo stato di 'zombie' e il suo genitore diventa automaticamente il processo 'init'.</li>
+</ul>
+<h3 id="processi-in-rust">Processi in Rust</h3>
+<p>In Rust, la <code>fork()</code> non è utilizzabile esplicitamente, se non ricorrendo a un crate esterno o chiamando direttamente la system call offerta dal SO. Sono invece disponibili delle funzioni che, come la <code>CreateProcess()</code> di Windows, permettono di creare un processo pulito in cui caricare automaticamente l'immagine dell'eseguibile desiderato.</p>
+<p>Per creare un nuovo processo in Rust si utilizza una struct di tipo <code>std::process::Command</code>, gestita attraverso il pattern 'Builder': dapprima si crea una nuova istanza di tale struct tramite il metodo <code>new()</code> (cui si passa il nome dell'eseguibile) e successivamente si utilizzano altri metodi, in catena, per configurarla con le opzioni desiderate (es. args). Questo approccio semplifica il metodo <code>new()</code> e offre flessibilità nella scelta delle opzioni.</p>
+<p>È quindi possibile avviare il processo chiamando uno dei seguenti metodi sulla struct <code>Command</code>:</p>
+<ol>
+<li>
+<p><code>output()</code>, che genera il processo e ne attende la terminazione, ritornando un valore di tipo <code>Result&lt;Output&gt;</code>, essendo <code>Output</code> una struct contenente i seguenti campi:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Output</span></span> {
+  <span class="hljs-keyword">pub</span> status: ExitStatus,
+  <span class="hljs-keyword">pub</span> stdout: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">u8</span>&gt;,
+  <span class="hljs-keyword">pub</span> stderr: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">u8</span>&gt;,
+}
+</div></code></pre>
+<p>I vettori di byte <code>stdout</code> e <code>stderr</code> contengono rispettivamente la trascrizione di tutto ciò che il processo figlio ha stampato su standard output e su standard error. Un esempio di utilizzo è il seguente: <img src="assets/uso_command.png" alt="utilizzo Command"></p>
+</li>
+<li>
+<p><code>status()</code>, analogo ad <code>output()</code>, ma che restituisce solo un <code>Result&lt;ExitStatus&gt;</code>, senza la trascrizione dell'output.</p>
+</li>
+<li>
+<p><code>spawn()</code>, che fa partire il processo senza attenderne la terminazione (non è bloccante) e restituisce un <code>Result&lt;Child&gt;</code>, essendo <code>Child</code> una struct contenente tre campi, <code>stdin</code>, <code>stdout</code> e <code>stderr</code>, per accedere ai relativi flussi del processo figlio. Inoltre, tale struct mette a disposizione una serie di metodi:</p>
+<ul>
+<li><code>id()</code>, che restituisce il PID assegnato al processo figlio;</li>
+<li><code>wait()</code>, che consente di attendere la terminazione del processo figlio, per conoscerne il codice di uscita;</li>
+<li><code>wait_with_output()</code>, che permette di attendere la terminazione del processo figlio ed ottenere, oltre al codice di uscita, una copia dello stdout e stderr (in una struct <code>Output</code>, come per il metodo <code>output()</code>);</li>
+<li><code>kill()</code>, che permette di forzare la terminazione del processo figlio;</li>
+</ul>
+</li>
+</ol>
+<p>Nell'esempio seguente è mostrato come accedere al flusso stdin del figlio per iniettare dell'input e come usare la <code>wait_with_output()</code> per attendere la terminazione del processo. Si possono redirigere lo stdin e lo stdout passando <code>Stdio::piped()</code> come parametro rispettivamente ai metodi <code>stdin()</code> e <code>stdout()</code> della struct <code>Command</code>, alla sua creazione.</p>
+<p><img src="assets/redirezione_io.png" alt="redirezione I/O"></p>
+<h3 id="interazione-tra-fork-e-stdio">Interazione tra fork() e stdio</h3>
+<p>Lo standard I/O è implementato secondo la strategia buffered: quando l'utente effettua input da tastiera o output su schermo, i singoli caratteri non vengono elaborati singolarmente, ma sono dapprima inseriti in un buffer. Quando il buffer è pieno, viene effettuata una volta sola l'operazione di I/O desiderata, con un significativo miglioramento nelle prestazioni rispetto alla versione unbuffered.</p>
+<p>Questo meccanismo può creare problemi se si utilizza la <code>fork()</code>, come avviene, ad esempio, nel seguente scenario:</p>
+<p>un processo riempie parzialmente il buffer dello stdout e, prima di averne effettuato il flush, chiama la <code>fork()</code>. L'intero spazio di indirizzamento viene duplicato e il processo figlio eredita anche una copia del buffer dello stdout dal padre. Tale processo effettua dunque una scrittura su stdout, ma l'output risultante contiene anche l'output pendente del processo padre al momento della chiamata alla <code>fork()</code>.</p>
+<p>Per questo motivo è opportuno forzare il flush su ogni file (compresi stdout e stderr) prima di chiamare la <code>fork()</code>.</p>
+<p>Il meccanismo di creazione dei processi offerto da Rust non soffre di questo problema, in quanto il processo creato è inizializzato con un'immagine pulita di un certo eseguibile.</p>
+<h3 id="terminazione-di-un-processo-in-rust">Terminazione di un processo in Rust</h3>
+<p>Per terminare un processo in Rust si può usare la funzione <code>std::process::exit(code: i32) -&gt; !</code> ('!' come valore di ritorno indica il fatto che una funzione non ritorni mai, es. loop infinito), che forza la terminazione immediata del processo con tutti i suoi thread, senza alcuna forma di pulizia (nessun distruttore viene eseguito). Benché il parametro della <code>exit()</code> sia un <code>i32</code>, in Linux (diversamente da Windows), solo il byte meno significativo viene considerato (Linux usa 16 bit per rapprensentare lo stato di un processo: gli 8 bit meno significativi rappresentano l'exit code, mentre quelli più significativi la ragione che ha causato la terminazione del processo, es. terminazione normale, ricezione di un segnale, ...).</p>
+<p>Un metodo simile a <code>exit()</code> e con le stesse problematiche è <code>std::process:abort() -&gt; !</code>. La differenza rispetto al precedente è che il codice di ritorno è stabilito automaticamente dalla funzione.</p>
+<p>Alternativamente, è possibile utilizzare la macro <code>panic!()</code> per terminare il thread corrente, <strong>con l'esecuzione di tutti i distruttori</strong>, senza determinare automaticamente la terminazione del processo (a meno che la chiamata non avvenga nel thread principale: in tal caso il SO causa la terminazione dell'intero processo).</p>
+<h3 id="gestione-di-altri-processi">Gestione di altri processi</h3>
+<p>In Rust, i metodi <code>wait()</code> e <code>wait_with_output()</code> possono essere usati su una struct di tipo <code>Child</code> allo scopo di attendere la terminazione di quel particolare processo. I SO offrono delle primitive più complesse che consentono di attendere la terminazione di <strong>tutti i processi</strong> o di <strong>almeno un processo</strong> in un dato insieme, ma tali primitive sono strettamente dipendenti dal particolare SO.</p>
+<p>Ad esempio, in Linux, sono disponibili le funzioni:</p>
+<ul>
+<li><code>pid_t wait(int* status)</code>, che permette a un processo di attendere uno qualsiasi tra i processi figli e ritorna il PID del processo terminato o -1 se il processo non ha figli;</li>
+<li><code>pid_t waitpid(pid_t pid, int* status, int options)</code>, che permette di attendere la terminazione di un figlio specifico, di cui è fornito il PID come parametro.</li>
+</ul>
+<h3 id="inter-process-communication-ipc">Inter-Process Communication (IPC)</h3>
+<p>Sebbene le forme più semplici di comunicazione tra processi, come l'intercettazione dello stato di uscita, dello stdin o dello stdout, siano talvolta sufficienti, esistono situazioni in cui tali metodi di comunicazione</p>
+<ul>
+<li>Non sono utilizzabili (esempio, processi preesistenti, non creati a partire dal processo corrente);</li>
+<li>Non sono adeguati al contesto;</li>
+</ul>
+<p>Esistono quindi forme più complesse di comunicazione, che permettono di aggirare tali limiti, e che si possono ottenere servendosi di primitive fornite dal SO, note nel loro insieme con il nome di <strong>IPC</strong>.</p>
+<p>Il primo problema da risolvere riguarda il formato dei dati scambiati tra processi:</p>
+<ul>
+<li>Per via della separazione degli spazi di indirizzamento, <strong>non è possibile scambiare</strong> strutture dati costruite per mezzo di <strong>puntatori</strong>, poiché essi sono privi di significato al di fuori del processo origine.</li>
+<li>Possono esserci <strong>differenze</strong> tra i processi in termini di <strong>rappresentazione dei dati</strong> (interi, stringhe, enum, ...) se gli eseguibili sono stati scritti con linguaggi di programmazione diversi. Alcuni tipi di dato potrebbero non essere disponibili o potrebbero risultare privi di senso nel processo con cui si vuole comunicare (es. non si può trasferire la handle di un file, che ha significato solo nel contesto del processo di partenza).</li>
+</ul>
+<p>Per risolvere tali problemi, si rende dunque necessario operare opportune <strong>trasformazioni sui dati</strong>, al fine di renderli comprensibili al destinatario, ossia passare da una rappresentazione interna al processo ad una esterna.</p>
+<h3 id="rappresentazione-esterna-dei-dati">Rappresentazione esterna dei dati</h3>
+<p>La rappresentazione esterna di una struttura dati arbitraria è un formato intermedio che permette di descrivere la struttura dati stessa senza mai fare riferimento a locazioni di memoria. Tale rappresentazione risulta particolarmente adatta per l'esportazione e il trasferimento dei dati.</p>
+<p>Esistono più formati che permettono di ottenere una rappresentazione esterna di una struttura dati:</p>
+<ul>
+<li>Formati <strong>basati su testo</strong> (XML, <strong>JSON</strong>, CSV, ...), immediatamente leggibili e interpretabili dal programmatore, ma più verbosi.</li>
+<li>Formati <strong>binari</strong> (XDR, HDF, <strong>protobuf</strong>, ...), non facilmente interpretabili dal programmatore, ma più compatti.</li>
+</ul>
+<h3 id="serializzazione">Serializzazione</h3>
+<p>Il processo di 'traduzione' dalla rappresentazione interna a quella esterna ha vari nomi; il più comune è <strong>serializzazione</strong>, per ragioni storiche. Il processo inverso prende il nome di <strong>deserializzazione</strong>.</p>
+<p>Altro nome diffuso per la serializzazione è 'marshalling' ('unmarshalling' per la deserializzazione).</p>
+<p>Oltre a permettere lo scambio di dati tra processi diversi, il processo di serializzazione/deserializzazione ha un altro vantaggio: ogni processo coinvolto nella comunicazione può rappresentare internamente gli stessi dati in maniera diversa, a seconda delle operazioni che devono essere eseguite sui dati stessi.</p>
+<h3 id="esempi-di-primitive-ipc">Esempi di primitive IPC</h3>
+<h4 id="coda-di-messaggi">Coda di messaggi</h4>
+<p>Un primo modo per implementare la IPC è quello di utilizzare una coda di messaggi, una struttura dati mantenuta dal SO che permette a molti processi sorgente di inviare messaggi a un processo destinazione specifico. La comunicazione è unidirezionale e asincrona: il SO memorizza il messaggio inviato finché non viene letto dal destinatario (in maniera simile ai canali MPSC).</p>
+<p>Ogni coda è posseduta dall'unico processo destinatario ed è identificata da un un nome univoco all'interno del SO, scelto dal proprietario stesso, normalmente noto a priori agli altri processi.</p>
+<p>Le code di messaggi sono note in ogni SO con un nome differente:</p>
+<ul>
+<li>in Windows sono dette <strong>Mailslot</strong> e possono essere create usando la primitiva <code>CreateMailslot()</code></li>
+<li>in Linux sono dette <strong>Fifo</strong> e possono essere create usando la primitiva <code>mkfifo()</code>.</li>
+</ul>
+<h4 id="pipe">Pipe</h4>
+<p>Le pipe sono dei 'tubi' che permettono il trasferimento di dati da un processo a un altro (comunicazione 1 a 1), purché i processi coinvolti abbiano un rapporto di parentela stretta (padre - figlio).</p>
+<p>Le pipe non segmentano automaticamente i messaggi, a differenza delle mailslot, per cui è il ricevitore stesso che deve separarli 'manualmente'. Alcuni formati, ad esempio JSON, si prestano meglio di altri (esempio CSV) a essere facilmente segmentati. Per questo motivo, si tende a inviare nelle pipe dati rappresentati in formati, come il JSON, che ben si prestano ad essere facilmente segmentati (più complicato effettuare questa operazione con il CSV).</p>
+<p>La comunicazione tramite pipe è <strong>semi-sincrona</strong>: è presente un buffer di memoria kernel nella quale il processo sorgente può scrivere in maniera asincrona, fino al suo riempimento; quando il buffer è pieno, il mittente viene bloccato in attesa (come per un canale sincrono).</p>
+<p>La creazione di una pipe comporta la generazione di due oggetti, assimilabili a file descriptor, che rappresentano le due estremità della pipe, rispettivamente in scrittura o lettura. In Linux, è possibile trasferire le estremità della pipe utilizzando la <code>fork()</code>. Il meccanismo è più complicato in Windows.</p>
+<p>In Rust, è possibile utilizzare le pipe, ad esempio, concatenando l'output di un processo all'input di un altro.</p>
+<p><img src="assets/rust_pipes.png" alt="Rust Pipes"></p>
+<h3 id="serializzazione-e-deserializzazione-con-libreria-serde">Serializzazione e Deserializzazione con libreria 'serde'</h3>
+<p>La libreria serde (serialize - deserialize) fornisce, tramite l'uso della macro <code>#[derive(Serialize, Deserialize)]</code>, le funzionalità di serializzazione e deserializzazione di una struttura dati Rust, in un certo formato esterno, per ciascuno dei quali esiste un crate apposito da importare insieme a quello base.</p>
+<p>Di seguito, sono riportati alcuni esempi di traduzione di strutture dati Rust in JSON (è omessa la derivazione di Serialize e Deserialize per semplicità) e di utilizzo della libreria serde:</p>
+<p><img src="assets/serializzazione_json.png" alt=""></p>
+<p><img src="assets/serializzazione_json_2.png" alt=""></p>
+<p><img src="assets/esempio_serializzazione.png" alt=""></p>
+<h3 id="comunicazione-tra-processi-con-le-librerie-interprocess-e-zbus">Comunicazione tra processi con le librerie 'interprocess' e 'zbus'</h3>
+<p>Il crate interprocess mette a disposizione delle strutture per gestire la comunicazione tra processi, tra cui pipes, segnali, socket... multipiattaforma oppure dipendenti dal SO.</p>
+<p>Il crate zbus consente anch'esso la comunicazione tra processi, ma è disponibile unicamente su Linux.</p>
+<h2 id="programmazione-asincrona">Programmazione asincrona</h2>
+<p>La realizzazione della concorrenza attraverso l'utilizzo di più thread è l'approccio maggiormente adottato nel momento in cui si abbia necessità di effettuare computazioni complesse (con alto utilizzo di CPU), separabili in parti più semplici, pressoché indipendenti. In questo caso, l'approccio multi-thread risulta vantaggioso, in quanto consente di sfruttare appieno una CPU multicore e di ridurre significativamente i tempi di esecuzione.</p>
+<p>Esistono, tuttavia, casi in cui tale approccio risulta poco adatto o, addirittura, controproducente. Ad esempio, si consideri uno scenario in cui un processo debba produrre dei dati da inviare sull'input di un altro processo, ad esempio usando una pipe. Se il primo processo produce dati a una velocità superiore a quella di elaborazione dei dati stessi (complice anche una eventuale comunicazione attraverso la rete), dopo un certo tempo, i buffer di trasmissione si riempiono, bloccando il processo produttore. Per limitare questo problema, si può pensare di separare il lavoro del primo processo su più thread, disaccoppiando la produzione dei dati dall'operazione di I/O verso il secondo processo. In questo modo, la produzione di dati non viene mai bloccata, perché la comunicazione tra i thread del primo processo può avvenire tramite un canale unbounded, non bloccante. Questa soluzione, per quanto utilizzabile, risulta macchinosa e complessa, oltre che inefficiente: l'utilizzo di più thread introduce un significativo overhead in termini di complessità (esempio, sincronizzazione) e di memoria utilizzata (ogni thread ha il proprio stack), il che, in un contesto di computazione cloud, si traduce in un aumento dei costi, aggravato dal fatto che la memoria occupata da un thread che effettua principalmente I/O è sostanzialmente sprecata, in quanto tale thread rimane nello stato not-runnable per la maggior parte del tempo.</p>
+<p>Per affrontare questa situazione sono possibili tre approcci:</p>
+<ol>
+<li>Un solo thread effettua sequenzialmente tutte le sue operazioni, accettando di rimanere bloccato durante le operazioni bloccanti di I/O. Questa soluzione è la più semplice, ma anche la più inefficiente.</li>
+<li>Si usano più thread per eseguire più operazioni contemporaneamente, riducendo l'impatto dell' attesa causata dall'I/O. Questo approccio migliora la velocità di esecuzione, ma è potenzialmente costoso e inefficiente.</li>
+<li>Si separa la richiesta di eseguire una certa operazione dall'esecuzione dell'operazione stessa, così da non bloccare il thread corrente. Questa soluzione prende il nome di <strong>programmazione asincrona</strong> ed è preferibile quando non occorre elaborare parallelamente dei dati, ma <strong>attendere in parallelo il risultato di un'operazione di I/O</strong>.</li>
+</ol>
+<h3 id="implementazione-dellesecuzione-asincrona">Implementazione dell'esecuzione asincrona</h3>
+<p>La programmazione asincrona richiede che le operazioni da eseguire sul risultato di una certa operazione siano racchiuse all'interno di una funzione apposita, detta <strong>callback</strong>, che deve essere chiamata, in maniera asincrona, non appena i dati sono pronti.</p>
+<p>Quando si vuole trasformare una funzione sincrona bloccante in una asincrona, occorre tenere presente che quest'ultima avrà una complessità superiore all'originale e come parametri dovrà ricevere tutti quelli passati alla funzione sincrona e, in aggiunta, una callback che permetta di operare sul risultato prodotto dalla funzione stessa.</p>
+<p>La modalità con cui questa callback viene chiamata dipende dal particolare linguaggio di programmazione.</p>
+<p>In Javascript, oltre allo stack e allo heap, esiste una terza struttura dati, assente in molti linguaggi, tra cui Rust, detta <strong>coda delle callback</strong>, in cui le callback vengono man mano depositate. Il thread principale di un'applicazione Javascript, l'unico controllabile dal programmatore, esegue costantemente un ciclo in cui attende la presenza di un messaggio nella coda, lo estrae e lo elabora.</p>
+<p>È possibile utilizzare lo stesso meccanismo basato sulle callback anche in Rust.</p>
+<p>Se occorre garantire che la callback di una funzione asincrona venga eseguita soltanto quando l'esecuzione di un'altra callback ha raggiunto un certo punto del suo codice, è necessario che le callback siano annidate. Questo modo di procedere, tuttavia, risulta piuttosto macchinoso e può portare alla scrittura di codice difficilmente comprensibile (si consideri, ad esempio un caso in cui bisogna anche gestire possibili errori).</p>
+<h3 id="esecuzione-parziale">Esecuzione parziale</h3>
+<p>Per ovviare ai problemi precedenti, Javascript introduce le <code>Promise</code>, oggetti ritornati immediatamente da una funzione asincrona che permettono di accedere, tramite opportuni metodi (<code>then()</code> e <code>catch()</code>), al risultato (o errore) prodotto dalla funzione stessa, non appena disponibile. Per semplificare l'utilizzo delle <code>Promise</code>, Javascript utilizza una sintassi alternativa che prevede l'utilizzo di due nuove keyword: <code>async</code> e <code>await</code>. Così facendo, il corpo di una funzione asincrona può essere scomposto in più parti distinte, opportunamente concatenate (tramite il metodo <code>then()</code> o usando <code>await</code>).</p>
+<p>In maniera analoga, Rust offre il tratto generico <code>Future</code> e le stesse keyword <code>async</code> e <code>await</code>. La parola chiave <code>async</code> deve essere premessa alla definizione della funzione (come in Javascript, es. <code>async fn ...</code>), mentre <code>await</code> si aggiunge come suffisso al termine di una chiamata a una funzione asincrona, es. <code>{...}.await</code> (senza parentesi tonde).</p>
+<p>Le <code>Promise</code> di Javascript e il tratto <code>Future</code> di Rust permettono, di fatto, di trasformare una funzione asincrona in una <strong>macchina a stati</strong>, che evolve nel tempo: a seconda dello stato corrente, viene eseguita una determinata porzione del codice della funzione asincrona originale. Tale porzione si interrompe:</p>
+<ul>
+<li><em>dopo</em> la successiva chiamata a un'altra funzione asincrona</li>
+<li>al termine del codice della funzione originale</li>
+</ul>
+<p>Se viene raggiunto un certo stato, ma i dati richiesti per operare non sono ancora disponibili, l'esecuzione viene temporaneamente interrotta e la macchina ritorna.</p>
+<p>Restano da chiarire alcuni dettagli implementativi. In particolare, occorrono:</p>
+<ul>
+<li>Un meccanismo che aggiorni lo stato, una volta raggiunto un certo punto dell'esecuzione;</li>
+<li>Un modo per segnalare quando l'esecuzione della macchina può riprendere, se precedentemente interrotta;</li>
+</ul>
+<p>Questa <strong>macchina a stati</strong> viene generata automaticamente dal compilatore ed è <strong>implementata come una chiusura</strong>, che si occupa di mantenere:</p>
+<ul>
+<li>lo stato corrente della macchina</li>
+<li>le variabili locali da passare come input ad ogni stato</li>
+</ul>
+<p>All'atto della compilazione, ogni funzione <code>async</code> viene trasformata in una normale funzione, con lo stesso nome, che ha come tipo di ritorno <code>impl Future&lt;Output = TIPO_DA_RITORNARE&gt;</code>, e il cui corpo viene sostituito con del codice che si occupa di inizializzare la macchina a stati creata dal compilatore stesso (si vedano le sezioni successive).</p>
+<p><img src="assets/async_await.png" alt=""></p>
+<h3 id="il-tratto-future">Il tratto Future</h3>
+<pre class="hljs"><code><div><span class="hljs-keyword">use</span> std::pin::Pin;
+<span class="hljs-keyword">use</span> std::task::{Context, Poll};
+
+<span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Future</span></span> {
+  <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Output</span></span>;
+
+  <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">poll</span></span>(<span class="hljs-keyword">self</span>: Pin&lt;&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">Self</span>&gt;, cx: &amp;<span class="hljs-keyword">mut</span> Context) -&gt; Poll&lt;Self::Output&gt;;
+}
+</div></code></pre>
+<p>Il tratto <code>Future</code> definisce un unico metodo, <code>poll()</code>, che ritorna un enum di tipo <code>Poll&lt;T&gt;</code>, utilizzabile per capire se il risultato della computazione asincrona sia disponibile o meno a un dato istante.</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">Poll</span></span>&lt;T&gt; {
+  Ready(T),
+  Pending,
+}
+</div></code></pre>
+<p>L'enum <code>Poll&lt;T&gt;</code> può assumere il valore:</p>
+<ul>
+<li><code>Pending</code>, se il risultato non è ancora stato prodotto</li>
+<li><code>Ready(T)</code>, se il risultato di tipo <code>T</code> è già disponibile.</li>
+</ul>
+<p>Il metodo <code>poll()</code> accetta due parametri:</p>
+<ol>
+<li>Un <code>Pin&lt;&amp;mut Self&gt;</code>, ovvero uno speciale smart pointer che impedisce che una struttura dati esistente venga spostata a un differente indirizzo di memoria, cosicché eventuali puntatori interni alla struttura dati che referenziano parti interne alla struttura dati stessa rimangano sempre validi;</li>
+<li>Un <code>Context</code>, contenente un oggetto di tipo <code>Waker</code>, che notifica la possibilità di chiamare nuovamente il metodo <code>poll()</code>, al fine di evitare il polling continuo, che costituisce uno spreco di risorse.</li>
+</ol>
+<p>In presenza di una funzione <code>async</code>, il compilatore divide per prima cosa il codice della funzione stessa in frammenti e affida l'esecuzione di ognuno di essi ad un preciso stato della macchina. Una volta eseguito il codice di certo stato, quest'ultimo viene aggiornato, e viene quindi avviata l'esecuzione del codice corrispondente allo stato successivo. Se i dati richiesti per la computazione sono già disponibili, la macchina evolve normalmente verso lo stato seguente, altrimenti si arresta momentaneamente, ritornando al chiamante un valore <code>Poll::Pending</code>.</p>
+<p>Di seguito, un esempio di funzionamento di tale meccanismo:</p>
+<p><img src="assets/macchina_stati.png" alt=""></p>
+<p>Per ciascuno stato individuato (normalmente pari al numero delle <code>await</code> più due), il compilatore definisce delle struct atte a contenere tutte le variabili locali che uno stato deve ricevere in ingresso dallo stato precedente (in pratica, i 'parametri' di ingresso per quello stato).</p>
+<p><img src="assets/stati_struct.png" alt=""></p>
+<p>Inoltre, il compilatore definisce un tipo enum che può assumere un numero di valori pari al numero di stati, ciascuno dei quali può incapsulare la rispettiva struct di 'parametri di ingresso' e per tale enum implementa il tratto <code>Future</code> (e quindi il metodo <code>poll()</code>).</p>
+<p><img src="assets/stati_enum.png" alt=""></p>
+<p><img src="assets/stati_enum_2.png" alt=""></p>
+<p><img src="assets/stati_enum_3.png" alt=""></p>
+<p><img src="assets/stati_enum_4.png" alt=""></p>
+<p>In definitiva, ogni funzione asincrona viene trasformata in una normale funzione che si limita a restituire un oggetto che implementa il tratto <code>Future</code>, più specificamente un enum che rappresenta lo stato iniziale della macchina. Ogni oggetto che implementa questo tratto è <strong>inerte</strong>, nel senso che nessuna forma di computazione viene avviata fino alla prima chiamata esplicita al metodo <code>poll()</code> (questo meccanismo è automatico e implicito quando si utilizza <code>.await</code>).</p>
+<p>Per poter utilizzare funzioni <code>async</code>, è necessario chiamarle dall'interno di altre funzioni <code>async</code>: di conseguenza, anche <code>main()</code> deve diventare <code>async</code>.</p>
+<h3 id="librerie-asincrone-esterne">Librerie asincrone esterne</h3>
+<p>Come visto in precedenza, se la macchina si trova in un certo stato e non può procedere per via dell'indisponibilità dei dati richiesti a un dato istante, essa si arresta momentaneamente e ritorna al chiamante il valore <code>Poll::Pending</code>.</p>
+<p>Rimane ancora da chiarire, in questi casi, <strong>quando e come far ripartire la macchina</strong>, ovvero quando chiamare nuovamente il metodo <code>poll()</code>.</p>
+<p>Sebbene <strong>Rust</strong> supporti l'implementazione automatica della struttura della macchina e dei tipi associati, <strong>non fornisce alcun supporto per l'esecuzione della macchina stessa</strong>.</p>
+<p>Questa scelta implementativa è dovuta alla necessità di evitare di vincolare eccessivamente il programmatore, lasciandogli invece la possibilità di servirsi delle librerie esterne più adatte a ogni particolare situazione.</p>
+<p>In particolare, ciò che manca per completare il meccanismo di funzionamento della macchina a stati, è un <code>Executor</code>, ossia del codice che permette di stabilire quando e come chiamare la <code>poll()</code> in maniera efficiente.</p>
+<p>Tra le diverse librerie disponibili, hanno particolare rilevanza:</p>
+<ul>
+<li><strong>Tokio</strong>: la libreria più diffusa e utilizzata in assoluto, potente e articolata, con proporzionale utilizzo di memoria; è molto performante in quanto utilizza (di default) un numero di thread pari al numero di core della CPU.</li>
+<li><strong>Smol</strong>: libreria semplificata, adatta a sistemi con poca memoria (es. sistemi embedded);</li>
+<li><strong>Async-std</strong>: compromesso tra Smol e Tokyo in termini di consumo di memoria e prestazioni. Offre la controparte asincrona di tutte le funzioni standard bloccanti;</li>
+</ul>
+
+</body>
+</html>
